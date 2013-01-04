@@ -1,7 +1,8 @@
 #$Id$
-#Copyright (c) 2009 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2009-2013 Pierre Pronchery <khorben@defora.org>
 
 
 
 #includes
-. "`dirname $0`/Apps/Devel/src/scripts/targets/Linux-i386"
+#XXX hardcoded
+. "`dirname $0`/Apps/Devel/src/scripts/scripts-git/targets/Linux-i386"
