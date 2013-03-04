@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2012 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org>
 #This file is part of DeforaOS Devel scripts
 #This program is free software: you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
@@ -24,10 +24,12 @@ PROJECTCONF="project.conf"
 VERBOSE=0
 #executables
 CVS="cvs"
+GIT="git"
 MAKE="make"
 RM="rm -f"
 TAR="tar"
 TR="tr"
+WC="wc"
 
 
 #functions
@@ -60,15 +62,14 @@ _deforaos_release()
 	fi
 
 	_info "Obtaining latest version..."
-	$DEBUG $CVS up -A
+	_release_fetch
 	if [ $? -ne 0 ]; then
 		_error "Could not update the sources"
 		return $?
 	fi
 
 	_info "Checking for differences..."
-	#XXX this method may be obsoleted in a future version of CVS
-	$DEBUG $CVS diff
+	_release_diff
 	if [ $? -ne 0 ]; then
 		_error "The sources were modified"
 		return $?
@@ -103,8 +104,8 @@ _deforaos_release()
 	tag=$(echo $version | $TR . -)
 	tag="${PACKAGE}_$tag"
 	_info "Tagging the sources as $tag..."
-	$DEBUG $CVS tag "$tag"
-	if [ $res -ne 0 ]; then
+	_release_tag "$tag"
+	if [ $? -ne 0 ]; then
 		_error "Could not tag the sources"
 		return $?
 	fi
@@ -117,6 +118,84 @@ _deforaos_release()
 	_info " * publish a news on $HOMEPAGE/os/news/submit"
 	_info " * tweet (possibly via freecode)"
 	_info " * package where appropriate (see deforaos-package.sh)"
+}
+
+_release_diff()
+{
+	if [ -d "CVS" ]; then
+		_release_diff_cvs
+		return $?
+	elif [ -d ".git" ]; then
+		_release_diff_git
+		return $?
+	else
+		return 2
+	fi
+}
+
+_release_diff_cvs()
+{
+	#XXX this method may be obsoleted in a future version of CVS
+	$DEBUG $CVS diff
+}
+
+_release_diff_git()
+{
+	lines=$($DEBUG $GIT diff | $WC -l)
+	[ $lines -eq 0 ] || return 2
+}
+
+_release_fetch()
+{
+	if [ -d "CVS" ]; then
+		_release_fetch_cvs
+		return $?
+	elif [ -d ".git" ]; then
+		_release_fetch_git
+		return $?
+	else
+		return 2
+	fi
+}
+
+_release_fetch_cvs()
+{
+	$DEBUG $CVS up -A
+}
+
+_release_fetch_git()
+{
+	$DEBUG $GIT pull origin master
+}
+
+_release_tag()
+{
+	tag="$1"
+
+	if [ -d "CVS" ]; then
+		_release_tag_cvs "$tag"
+		return $?
+	elif [ -d ".git" ]; then
+		_release_tag_git "$tag"
+		return $?
+	else
+		return 2
+	fi
+}
+
+_release_tag_cvs()
+{
+	tag="$1"
+
+	$DEBUG $CVS tag "$tag"
+}
+
+_release_tag_git()
+{
+	tag="$1"
+
+	$DEBUG $GIT tag "$tag"					|| return 2
+	$DEBUG $GIT push --tags					|| return 2
 }
 
 
