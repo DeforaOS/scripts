@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #$Id$
-#Copyright (c) 2012 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org>
 #This file is part of DeforaOS Devel scripts
 #This program is free software: you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
@@ -19,18 +19,25 @@
 #environment
 umask 022
 #variables
-[ -z "$CVSROOT" ] && CVSROOT=":pserver:anonymous@anoncvs.defora.org:/home/cvs"
 DATE=`date '+%Y%m%d'`
 DESTDIR="/var/www"
 DEVNULL="/dev/null"
 EMAIL="webmaster@defora.org"
 ROOT=
-MODULE="DeforaOS"
 SRC=
 
+#CVS
+CVSMODULE="DeforaOS"
+[ -z "$CVSROOT" ] && CVSROOT=":pserver:anonymous@anoncvs.defora.org:/home/cvs"
+
+#Git
+[ -z "$GITROOT" ] && GITROOT="git://github.com/DeforaOS/DeforaOS.git"
+
 #executables
+CONFIGURE="configure"
 CVS="cvs -q"
 FIND="find"
+GIT="git"
 INSTALL="install -m 0644"
 LN="ln -f"
 MAIL="mail"
@@ -42,9 +49,11 @@ TOUCH="touch"
 
 
 #functions
-#deforaos_document
-_deforaos_document()
+#deforaos_document_cvs
+_deforaos_document_cvs()
 {
+	[ -n "$SRC" ] || SRC="$ROOT/$CVSMODULE"
+
 	#configure cvs if necessary
 	$MKDIR -- "$HOME"					|| exit 2
 	if [ ! -f "$HOME/.cvspass" ]; then
@@ -54,14 +63,14 @@ _deforaos_document()
 	#checkout tree if necessary
 	if [ ! -d "$SRC" ]; then
 		echo ""
-		echo "Checking out CVS module $MODULE:"
-		(cd "$ROOT" && $CVS "-d$CVSROOT" co "$MODULE") > "$DEVNULL" \
+		echo "Checking out CVS module $CVSMODULE:"
+		(cd "$ROOT" && $CVS "-d$CVSROOT" co "$CVSMODULE") > "$DEVNULL" \
 								|| exit 2
 	fi
 
 	#document tree
 	echo ""
-	echo "Documenting CVS module $MODULE:"
+	echo "Documenting CVS module $CVSMODULE:"
 
 	#manual pages
 	echo ""
@@ -86,18 +95,56 @@ _deforaos_document()
 }
 
 
+#deforaos_document_git
+_deforaos_document_git()
+{
+	SRC="DeforaOS.git"
+
+	#checkout tree if necessary
+	if [ ! -d "$SRC" ]; then
+		echo ""
+		echo "Checking out Git repository $SRC:"
+		$GIT clone "$GITROOT" "$SRC" > "$DEVNULL"	|| exit 2
+	fi
+
+	#document tree
+	echo ""
+	echo "Documenting Git repository $SRC:"
+
+	#manual pages
+	echo ""
+	echo " * manual pages"
+	(cd "$SRC/Library/Documentation/src/DeforaOS Manual Pages" &&
+		$CONFIGURE &&
+		$MAKE &&
+		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
+		$FIND "doc/manual" -name "*.html" -exec \
+			$INSTALL -- {} "$DESTDIR/htdocs/{}" \;)
+
+	#erase temporary data
+	$RM -r "$ROOT"
+}
+
+
 #usage
 _usage()
 {
-	echo "Usage: deforaos-document.sh [-O name=value...]" 1>&2
+	echo "Usage: deforaos-document.sh [-C | -g][-O name=value...]" 1>&2
 	return 1
 }
 
 
 #main
 #parse options
-while getopts "O:" name; do
+document=_deforaos_document_cvs
+while getopts "CgO:" name; do
 	case "$name" in
+		C)
+			document=_deforaos_document_cvs
+			;;
+		g)
+			document=_deforaos_document_git
+			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
@@ -114,5 +161,4 @@ if [ $# -ne 0 ]; then
 fi
 [ -n "$ROOT" ] || ROOT=$(mktemp -d -p "$HOME" "temp.XXXXXX")
 [ -n "$ROOT" ] || exit 2
-[ -n "$SRC" ] || SRC="$ROOT/$MODULE"
-_deforaos_document 2>&1 | $MAIL -s "Daily CVS documentation: $DATE" "$EMAIL"
+$document 2>&1 | $MAIL -s "Daily CVS documentation: $DATE" "$EMAIL"
