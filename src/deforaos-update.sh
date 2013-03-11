@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #$Id$
-#Copyright (c) 2008-2012 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2008-2013 Pierre Pronchery <khorben@defora.org>
 #This file is part of DeforaOS Devel scripts
 #This program is free software: you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
@@ -19,20 +19,32 @@
 #environment
 umask 022
 #variables
-[ -z "$CVSROOT" ] && CVSROOT=":pserver:anonymous@anoncvs.defora.org:/home/cvs"
-DATE=`date '+%Y%m%d'`
+DATE=$(date '+%Y%m%d')
 DESTDIR="/var/www"
+DEVNULL="/dev/null"
 EMAIL="devel@lists.defora.org"
 HOMEPAGE="http://www.defora.org"
-MODULE="DeforaOS"
-SRC="$HOME/$MODULE"
+ROOT=
+SRC=
+
+#CVS
+CVSMODULE="DeforaOS"
+SRC="$HOME/$CVSMODULE"
+[ -z "$CVSROOT" ] && CVSROOT=":pserver:anonymous@anoncvs.defora.org:/home/cvs"
+
+#Git
+[ -z "$GITROOT" ] && GITROOT="git://github.com/DeforaOS/DeforaOS.git"
 
 #executables
+CONFIGURE="configure"
 CVS="cvs -q"
+FIND="find"
+GIT="git"
 LN="ln -f"
 MAIL="mail"
 MAKE="make"
 MKDIR="mkdir -m 0755 -p"
+MKTEMP="mktemp"
 RM="rm -f"
 TAR="tar"
 TOUCH="touch"
@@ -40,9 +52,11 @@ XARGS="xargs"
 
 
 #functions
-#deforaos_update
-_deforaos_update()
+#deforaos_update_cvs
+_deforaos_update_cvs()
 {
+	[ -n "$SRC" ] || SRC="$ROOT/$CVSMODULE"
+
 	#configure cvs if necessary
 	$MKDIR "$HOME"						|| exit 2
 	if [ ! -f "$HOME/.cvspass" ]; then
@@ -52,21 +66,70 @@ _deforaos_update()
 	#checkout tree if necessary
 	if [ ! -d "$SRC" ]; then
 		echo ""
-		echo "Checking out CVS module $MODULE:"
-		(cd "$HOME" && $CVS "-d$CVSROOT" co "$MODULE")	|| exit 2
+		echo "Checking out CVS module $CVSMODULE:"
+		(cd "$HOME" && $CVS "-d$CVSROOT" co "$CVSMODULE") \
+								|| exit 2
 	fi
 
 	#update tree
 	echo ""
-	echo "Updating CVS module $MODULE:"
+	echo "Updating CVS module $CVSMODULE:"
 	(cd "$SRC" && $CVS update -dPA)				|| exit 2
 
 	#make archive
 	echo ""
-	echo "Archiving CVS module $MODULE:"
+	echo "Archiving CVS module $CVSMODULE:"
 	for i in *; do
 		echo "DeforaOS-$DATE/$i"
 	done | ($LN -s . "DeforaOS-$DATE" \
+			&& $XARGS $TAR -czf "$DESTDIR/htdocs/download/snapshots/DeforaOS-daily.tar.gz")
+	$RM "DeforaOS-$DATE"
+	echo "$HOMEPAGE/download/snapshots/DeforaOS-daily.tar.gz"
+}
+
+
+#deforaos_update_git
+_deforaos_update_git()
+{
+	SRC="DeforaOS.git"
+
+	#checkout tree if necessary
+	if [ ! -d "$SRC" ]; then
+		echo ""
+		echo "Checking out Git repository $SRC:"
+		$GIT clone "$GITROOT" "$SRC" > "$DEVNULL"	|| exit 2
+	fi
+
+	#update tree
+	echo ""
+	echo "Updating Git repository $SRC:"
+	(cd "$SRC" && $GIT checkout -f && $GIT pull > "$DEVNULL") \
+								|| exit 2
+
+	#re-generate the makefiles
+	echo ""
+	echo "Re-generating the Makefiles:"
+	$CONFIGURE "$SRC/System/src" "$SRC/Apps" "$SRC/Library"	|| exit 2
+
+	#update the sub-repositories
+	echo ""
+	echo "Updating the sub-repositories:"
+	$FIND "$SRC" -name script.sh | while read script; do
+		parent="${script%%/script.sh}"
+		#XXX read project.conf instead
+		for i in "$parent/"*; do
+			[ -d "$i" ] || continue
+			(cd "$i" && $MAKE download) > "$DEVNULL"
+		done
+	done
+
+	#make archive
+	echo ""
+	echo "Archiving DeforaOS from Git repository $GITROOT:"
+	for i in "$SRC/.git" "$SRC/"*; do
+		i=${i##$SRC/}
+		echo "DeforaOS-$DATE/$i"
+	done | ($LN -s "$SRC" "DeforaOS-$DATE" \
 			&& $XARGS $TAR -czf "$DESTDIR/htdocs/download/snapshots/DeforaOS-daily.tar.gz")
 	$RM "DeforaOS-$DATE"
 	echo "$HOMEPAGE/download/snapshots/DeforaOS-daily.tar.gz"
@@ -83,8 +146,15 @@ _usage()
 
 #main
 #parse options
-while getopts "O:" name; do
+update=_deforaos_update_cvs
+while getopts "CgO:" name; do
 	case "$name" in
+		C)
+			update=_deforaos_update_cvs
+			;;
+		g)
+			update=_deforaos_update_git
+			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
@@ -99,4 +169,6 @@ if [ $# -ne 0 ]; then
 	_usage
 	exit $?
 fi
-_deforaos_update 2>&1 | $MAIL -s "Daily CVS update: $DATE" "$EMAIL"
+[ -n "$ROOT" ] || ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
+[ -n "$ROOT" ] || exit 2
+$update 2>&1 | $MAIL -s "Daily CVS update: $DATE" "$EMAIL"
