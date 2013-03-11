@@ -19,7 +19,7 @@
 #environment
 umask 022
 #variables
-DATE=`date '+%Y%m%d'`
+DATE=$(date '+%Y%m%d')
 DESTDIR="/var/www"
 DEVNULL="/dev/null"
 EMAIL="webmaster@defora.org"
@@ -43,6 +43,7 @@ LN="ln -f"
 MAIL="mail"
 MAKE="make"
 MKDIR="mkdir -m 0755 -p"
+MKTEMP="mktemp"
 RM="rm -f"
 TAR="tar"
 TOUCH="touch"
@@ -159,6 +160,6 @@ if [ $# -ne 0 ]; then
 	_usage
 	exit $?
 fi
-[ -n "$ROOT" ] || ROOT=$(mktemp -d -p "$HOME" "temp.XXXXXX")
+[ -n "$ROOT" ] || ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
 [ -n "$ROOT" ] || exit 2
 $document 2>&1 | $MAIL -s "Daily CVS documentation: $DATE" "$EMAIL"
