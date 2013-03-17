@@ -33,7 +33,7 @@ SRC="$HOME/$CVSMODULE"
 [ -z "$CVSROOT" ] && CVSROOT=":pserver:anonymous@anoncvs.defora.org:/home/cvs"
 
 #Git
-[ -z "$GITROOT" ] && GITROOT="git://github.com/DeforaOS/DeforaOS.git"
+[ -z "$GITROOT" ] && GITROOT="http://git.defora.org/git/DeforaOS.git"
 
 #executables
 CONFIGURE="configure"
