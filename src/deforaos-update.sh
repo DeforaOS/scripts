@@ -46,6 +46,7 @@ MAKE="make"
 MKDIR="mkdir -m 0755 -p"
 MKTEMP="mktemp"
 RM="rm -f"
+RMDIR="rmdir"
 TAR="tar"
 TOUCH="touch"
 XARGS="xargs"
@@ -175,3 +176,4 @@ fi
 [ -n "$ROOT" ] || ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
 [ -n "$ROOT" ] || exit 2
 $update 2>&1 | $MAIL -s "Daily $scm update: $DATE" "$EMAIL"
+$RMDIR "$ROOT"
