@@ -147,12 +147,15 @@ _usage()
 #main
 #parse options
 update=_deforaos_update_cvs
+scm=
 while getopts "CgO:" name; do
 	case "$name" in
 		C)
+			scm="CVS"
 			update=_deforaos_update_cvs
 			;;
 		g)
+			scm="Git"
 			update=_deforaos_update_git
 			;;
 		O)
@@ -171,4 +174,4 @@ if [ $# -ne 0 ]; then
 fi
 [ -n "$ROOT" ] || ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
 [ -n "$ROOT" ] || exit 2
-$update 2>&1 | $MAIL -s "Daily CVS update: $DATE" "$EMAIL"
+$update 2>&1 | $MAIL -s "Daily $scm update: $DATE" "$EMAIL"
