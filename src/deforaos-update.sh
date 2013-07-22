@@ -104,7 +104,7 @@ _deforaos_update_git()
 	#update tree
 	echo ""
 	echo "Updating Git repository $SRC:"
-	(cd "$SRC" && $GIT checkout -f && $GIT pull -v > "$DEVNULL") \
+	(cd "$SRC" && $GIT checkout -f && $GIT pull) > "$DEVNULL" \
 								|| exit 2
 
 	#re-generate the makefiles
@@ -119,7 +119,7 @@ _deforaos_update_git()
 		parent="${script%%/script.sh}"
 		#XXX read project.conf instead
 		for i in "$parent/"*; do
-			[ -d "$i" ] || continue
+			[ -f "$i/Makefile" ] || continue
 			(cd "$i" && $MAKE download) > "$DEVNULL"
 		done
 	done
@@ -146,18 +146,19 @@ _usage()
 
 
 #main
+delete=0
 #parse options
 update=_deforaos_update_cvs
-SCM="CVS"
+scm="CVS"
 while getopts "CGO:" name; do
 	case "$name" in
 		C)
 			update=_deforaos_update_cvs
-			SCM="CVS"
+			scm="CVS"
 			;;
 		G)
 			update=_deforaos_update_git
-			SCM="Git"
+			scm="Git"
 			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
@@ -173,7 +174,10 @@ if [ $# -ne 0 ]; then
 	_usage
 	exit $?
 fi
-[ -n "$ROOT" ] || ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
+if [ -z "$ROOT" ]; then
+	ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
+	delete=1
+fi
 [ -n "$ROOT" ] || exit 2
-$update 2>&1 | $MAIL -s "Daily $SCM update: $DATE" "$EMAIL"
-$RMDIR "$ROOT"
+$update 2>&1 | $MAIL -s "Daily $scm update: $DATE" "$EMAIL"
+[ $delete -eq 1 ] && $RMDIR "$ROOT"
