@@ -114,6 +114,18 @@ _deforaos_document_git()
 								|| exit 2
 	fi
 
+	#update tree
+	echo ""
+	echo "Updating Git repository $SRC:"
+	(cd "$ROOT/$SRC" &&
+		$CONFIGURE "System/src" "Apps" "Library") > "$DEVNULL" \
+								|| exit 2
+	$FIND "$ROOT/$SRC/System/src" "$ROOT/$SRC/Apps" "$ROOT/$SRC/Library" -name config.sh | while read configsh; do
+		folder="${configsh%%/config.sh}"
+		[ -f "$folder/Makefile" ] || continue
+		(cd "$folder" && $MAKE download) > "$DEVNULL"
+	done
+
 	#document tree
 	echo ""
 	echo "Documenting Git repository $SRC:"
@@ -122,7 +134,6 @@ _deforaos_document_git()
 	echo ""
 	echo " * manual pages"
 	(cd "$ROOT/$SRC/Library/Documentation/src/DeforaOS Manual Pages" &&
-		$CONFIGURE &&
 		$MAKE &&
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
 		$FIND "doc/manual" -name "*.html" -exec \
@@ -132,7 +143,7 @@ _deforaos_document_git()
 	#generic documentation
 	echo ""
 	echo " * generic documentation"
-	$FIND "$SRC/System" "$SRC/Apps" -name "doc" | while read path; do
+	$FIND "$ROOT/$SRC/System" "$ROOT/$SRC/Apps" -name "doc" | while read path; do
 		[ -x "$path/docbook.sh" -o -x "$path/gtkdoc.sh" ] || continue
 		(cd "$path" && $MAKE DESTDIR="$DESTDIR" PREFIX="/" \
 				install > "$DEVNULL")
