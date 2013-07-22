@@ -144,16 +144,18 @@ _deforaos_update_git()
 _usage()
 {
 	echo "Usage: deforaos-update.sh [-C | -G][-O name=value...]" 1>&2
+	echo "       deforaos-update.sh -m [-C | -G][-O name=value...]" 1>&2
 	return 1
 }
 
 
 #main
 delete=0
+email=0
 #parse options
 update=_deforaos_update_cvs
 scm="CVS"
-while getopts "CGO:" name; do
+while getopts "CGO:m" name; do
 	case "$name" in
 		C)
 			update=_deforaos_update_cvs
@@ -165,6 +167,9 @@ while getopts "CGO:" name; do
 			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
+		m)
+			email=1
 			;;
 		*)
 			_usage
@@ -182,5 +187,9 @@ if [ -z "$ROOT" ]; then
 	delete=1
 fi
 [ -n "$ROOT" ] || exit 2
-$update 2>&1 | $MAIL -s "Daily $scm update: $DATE" "$EMAIL"
+if [ $email -eq 1 ]; then
+	$update 2>&1 | $MAIL -s "Daily $scm update: $DATE" "$EMAIL"
+else
+	$update
+fi
 [ $delete -eq 1 ] && $RMDIR "$ROOT"
