@@ -130,7 +130,7 @@ _deforaos_document_git()
 #usage
 _usage()
 {
-	echo "Usage: deforaos-document.sh [-C | -g][-O name=value...]" 1>&2
+	echo "Usage: deforaos-document.sh [-C | -G][-O name=value...]" 1>&2
 	return 1
 }
 
@@ -138,13 +138,16 @@ _usage()
 #main
 #parse options
 document=_deforaos_document_cvs
-while getopts "CgO:" name; do
+SCM="CVS"
+while getopts "CGO:" name; do
 	case "$name" in
 		C)
 			document=_deforaos_document_cvs
+			SCM="CVS"
 			;;
-		g)
+		G)
 			document=_deforaos_document_git
+			SCM="Git"
 			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
@@ -162,4 +165,4 @@ if [ $# -ne 0 ]; then
 fi
 [ -n "$ROOT" ] || ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
 [ -n "$ROOT" ] || exit 2
-$document 2>&1 | $MAIL -s "Daily CVS documentation: $DATE" "$EMAIL"
+$document 2>&1 | $MAIL -s "Daily $SCM documentation: $DATE" "$EMAIL"
