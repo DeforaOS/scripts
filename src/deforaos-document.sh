@@ -64,6 +64,7 @@ _deforaos_document_cvs()
 
 	#checkout tree if necessary
 	if [ ! -d "$SRC" ]; then
+		$MKDIR -- "$ROOT"				|| exit 2
 		echo ""
 		echo "Checking out CVS module $CVSMODULE:"
 		(cd "$ROOT" && $CVS "-d$CVSROOT" co "$CVSMODULE") > "$DEVNULL" \
@@ -107,23 +108,35 @@ _deforaos_document_git()
 	SRC="DeforaOS.git"
 
 	#checkout tree if necessary
-	if [ ! -d "$SRC" ]; then
+	if [ ! -d "$ROOT/$SRC" ]; then
+		$MKDIR -- "$ROOT"				|| exit 2
 		echo ""
 		echo "Checking out Git repository $SRC:"
-		(cd "$ROOT" && $GIT clone "$GITROOT" "$SRC") > "$DEVNULL" \
-								|| exit 2
+		$GIT clone "$GITROOT" "$ROOT/$SRC" > "$DEVNULL"	|| exit 2
 	fi
 
 	#update tree
 	echo ""
 	echo "Updating Git repository $SRC:"
-	(cd "$ROOT/$SRC" &&
-		$CONFIGURE "System/src" "Apps" "Library") > "$DEVNULL" \
+	(cd "$ROOT/$SRC" && $GIT checkout -f && $GIT pull) > "$DEVNULL" \
 								|| exit 2
-	$FIND "$ROOT/$SRC/System/src" "$ROOT/$SRC/Apps" "$ROOT/$SRC/Library" -name config.sh | while read configsh; do
-		folder="${configsh%%/config.sh}"
-		[ -f "$folder/Makefile" ] || continue
-		(cd "$folder" && $MAKE download) > "$DEVNULL"
+
+	#re-generate makefiles
+	echo ""
+	echo "Re-generating the Makefiles:"
+	$CONFIGURE "$ROOT/$SRC/System/src" "$ROOT/$SRC/Apps" \
+		"$ROOT/$SRC/Library"				|| exit 2
+
+	#update the sub-repositories
+	echo ""
+	echo "Updating the sub-repositories:"
+	$FIND "$ROOT/$SRC" -name script.sh | while read script; do
+		parent="${script%%/script.sh}"
+		#XXX read project.conf instead
+		for i in "$parent/"*; do
+			[ -f "$i/Makefile" ] || continue
+			(cd "$i" && $MAKE download) > "$DEVNULL"
+		done
 	done
 
 	#document tree
@@ -161,18 +174,19 @@ _usage()
 
 
 #main
+delete=0
 #parse options
 document=_deforaos_document_cvs
-SCM="CVS"
+scm="CVS"
 while getopts "CGO:" name; do
 	case "$name" in
 		C)
 			document=_deforaos_document_cvs
-			SCM="CVS"
+			scm="CVS"
 			;;
 		G)
 			document=_deforaos_document_git
-			SCM="Git"
+			scm="Git"
 			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
@@ -188,7 +202,10 @@ if [ $# -ne 0 ]; then
 	_usage
 	exit $?
 fi
-[ -n "$ROOT" ] || ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
+if [ -z "$ROOT" ]; then
+	ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
+	delete=1
+fi
 [ -n "$ROOT" ] || exit 2
-$document 2>&1 | $MAIL -s "Daily $SCM documentation: $DATE" "$EMAIL"
-$RM -r "$ROOT"
+$document 2>&1 | $MAIL -s "Daily $scm documentation: $DATE" "$EMAIL"
+[ $delete -eq 1 ] && $RM -r "$ROOT"

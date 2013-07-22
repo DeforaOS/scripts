@@ -96,27 +96,29 @@ _deforaos_update_git()
 	SRC="DeforaOS.git"
 
 	#checkout tree if necessary
-	if [ ! -d "$SRC" ]; then
+	if [ ! -d "$ROOT/$SRC" ]; then
+		$MKDIR -- "$ROOT"				|| exit 2
 		echo ""
 		echo "Checking out Git repository $SRC:"
-		$GIT clone "$GITROOT" "$SRC" > "$DEVNULL"	|| exit 2
+		$GIT clone "$GITROOT" "$ROOT/$SRC" > "$DEVNULL"	|| exit 2
 	fi
 
 	#update tree
 	echo ""
 	echo "Updating Git repository $SRC:"
-	(cd "$SRC" && $GIT checkout -f && $GIT pull) > "$DEVNULL" \
+	(cd "$ROOT/$SRC" && $GIT checkout -f && $GIT pull) > "$DEVNULL" \
 								|| exit 2
 
-	#re-generate the makefiles
+	#re-generate makefiles
 	echo ""
 	echo "Re-generating the Makefiles:"
-	$CONFIGURE "$SRC/System/src" "$SRC/Apps" "$SRC/Library"	|| exit 2
+	$CONFIGURE "$ROOT/$SRC/System/src" "$ROOT/$SRC/Apps" \
+		"$ROOT/$SRC/Library"				|| exit 2
 
 	#update the sub-repositories
 	echo ""
 	echo "Updating the sub-repositories:"
-	$FIND "$SRC" -name script.sh | while read script; do
+	$FIND "$ROOT/$SRC" -name script.sh | while read script; do
 		parent="${script%%/script.sh}"
 		#XXX read project.conf instead
 		for i in "$parent/"*; do
@@ -128,12 +130,12 @@ _deforaos_update_git()
 	#make archive
 	echo ""
 	echo "Archiving DeforaOS from Git repository $GITROOT:"
-	for i in "$SRC/.git" "$SRC/"*; do
-		i=${i##$SRC/}
+	for i in "$ROOT/$SRC/.git" "$ROOT/$SRC/"*; do
+		i=${i##$ROOT/$SRC/}
 		echo "DeforaOS-$DATE/$i"
-	done | ($LN -s "$SRC" "DeforaOS-$DATE" \
+	done | (cd "$ROOT" && $LN -s "$SRC" "DeforaOS-$DATE" \
 			&& $XARGS $TAR -czf "$DESTDIR/htdocs/download/snapshots/DeforaOS-daily.tar.gz")
-	$RM "DeforaOS-$DATE"
+	$RM "$ROOT/DeforaOS-$DATE"
 	echo "$HOMEPAGE/download/snapshots/DeforaOS-daily.tar.gz"
 }
 
@@ -141,7 +143,7 @@ _deforaos_update_git()
 #usage
 _usage()
 {
-	echo "Usage: deforaos-update.sh [-O name=value...]" 1>&2
+	echo "Usage: deforaos-update.sh [-C | -G][-O name=value...]" 1>&2
 	return 1
 }
 
