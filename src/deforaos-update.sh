@@ -104,7 +104,7 @@ _deforaos_update_git()
 	#update tree
 	echo ""
 	echo "Updating Git repository $SRC:"
-	(cd "$SRC" && $GIT checkout -f && $GIT pull > "$DEVNULL") \
+	(cd "$SRC" && $GIT checkout -f && $GIT pull -v > "$DEVNULL") \
 								|| exit 2
 
 	#re-generate the makefiles
