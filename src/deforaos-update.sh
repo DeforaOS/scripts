@@ -66,6 +66,7 @@ _deforaos_update_cvs()
 
 	#checkout tree if necessary
 	if [ ! -d "$SRC" ]; then
+		$MKDIR -- "$ROOT"				|| exit 2
 		echo ""
 		echo "Checking out CVS module $CVSMODULE:"
 		(cd "$ROOT" && $CVS "-d$CVSROOT" co "$CVSMODULE") \
