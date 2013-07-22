@@ -90,9 +90,6 @@ _deforaos_document_cvs()
 		(cd "$path" && $MAKE DESTDIR="$DESTDIR" PREFIX="/" \
 				install > "$DEVNULL")
 	done
-
-	#erase temporary data
-	$RM -r "$ROOT"
 }
 
 
@@ -121,9 +118,6 @@ _deforaos_document_git()
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
 		$FIND "doc/manual" -name "*.html" -exec \
 			$INSTALL -- {} "$DESTDIR/htdocs/{}" \;)
-
-	#erase temporary data
-	$RM -r "$ROOT"
 }
 
 
@@ -166,3 +160,4 @@ fi
 [ -n "$ROOT" ] || ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
 [ -n "$ROOT" ] || exit 2
 $document 2>&1 | $MAIL -s "Daily $SCM documentation: $DATE" "$EMAIL"
+$RM -r "$ROOT"
