@@ -23,6 +23,7 @@ DATE=$(date '+%Y%m%d')
 DESTDIR="/var/www"
 DEVNULL="/dev/null"
 EMAIL="webmaster@defora.org"
+HOMEPAGE="http://www.defora.org"
 ROOT=
 SRC=
 
@@ -69,6 +70,11 @@ _deforaos_document_cvs()
 								|| exit 2
 	fi
 
+	#update tree
+	echo ""
+	echo "Updating CVS module $CVSMODULE:"
+	(cd "$SRC" && $CVS update -dPA) > "$DEVNULL"		|| exit 2
+
 	#document tree
 	echo ""
 	echo "Documenting CVS module $CVSMODULE:"
@@ -81,6 +87,7 @@ _deforaos_document_cvs()
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
 		$FIND "doc/manual" -name "*.html" -exec \
 			$INSTALL -- {} "$DESTDIR/htdocs/{}" \;)
+	echo "   $HOMEPAGE/doc/manual"
 
 	#generic documentation
 	echo ""
@@ -90,6 +97,7 @@ _deforaos_document_cvs()
 		(cd "$path" && $MAKE DESTDIR="$DESTDIR" PREFIX="/" \
 				install > "$DEVNULL")
 	done
+	echo "   $HOMEPAGE/doc/gtk-doc/html"
 }
 
 
@@ -118,6 +126,7 @@ _deforaos_document_git()
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
 		$FIND "doc/manual" -name "*.html" -exec \
 			$INSTALL -- {} "$DESTDIR/htdocs/{}" \;)
+	echo "   $HOMEPAGE/doc/manual"
 }
 
 

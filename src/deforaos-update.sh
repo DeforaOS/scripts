@@ -59,7 +59,7 @@ _deforaos_update_cvs()
 	[ -n "$SRC" ] || SRC="$ROOT/$CVSMODULE"
 
 	#configure cvs if necessary
-	$MKDIR "$HOME"						|| exit 2
+	$MKDIR -- "$HOME"					|| exit 2
 	if [ ! -f "$HOME/.cvspass" ]; then
 		$TOUCH "$HOME/.cvspass"				|| exit 2
 	fi
@@ -68,7 +68,7 @@ _deforaos_update_cvs()
 	if [ ! -d "$SRC" ]; then
 		echo ""
 		echo "Checking out CVS module $CVSMODULE:"
-		(cd "$HOME" && $CVS "-d$CVSROOT" co "$CVSMODULE") \
+		(cd "$ROOT" && $CVS "-d$CVSROOT" co "$CVSMODULE") \
 								|| exit 2
 	fi
 
@@ -148,16 +148,16 @@ _usage()
 #main
 #parse options
 update=_deforaos_update_cvs
-scm=
-while getopts "CgO:" name; do
+SCM="CVS"
+while getopts "CGO:" name; do
 	case "$name" in
 		C)
-			scm="CVS"
 			update=_deforaos_update_cvs
+			SCM="CVS"
 			;;
-		g)
-			scm="Git"
+		G)
 			update=_deforaos_update_git
+			SCM="Git"
 			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
@@ -175,5 +175,5 @@ if [ $# -ne 0 ]; then
 fi
 [ -n "$ROOT" ] || ROOT=$($MKTEMP -d -p "$HOME" "temp.XXXXXX")
 [ -n "$ROOT" ] || exit 2
-$update 2>&1 | $MAIL -s "Daily $scm update: $DATE" "$EMAIL"
+$update 2>&1 | $MAIL -s "Daily $SCM update: $DATE" "$EMAIL"
 $RMDIR "$ROOT"
