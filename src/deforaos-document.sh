@@ -110,7 +110,8 @@ _deforaos_document_git()
 	if [ ! -d "$SRC" ]; then
 		echo ""
 		echo "Checking out Git repository $SRC:"
-		$GIT clone "$GITROOT" "$SRC" > "$DEVNULL"	|| exit 2
+		(cd "$ROOT" && $GIT clone "$GITROOT" "$SRC") > "$DEVNULL" \
+								|| exit 2
 	fi
 
 	#document tree
@@ -120,13 +121,23 @@ _deforaos_document_git()
 	#manual pages
 	echo ""
 	echo " * manual pages"
-	(cd "$SRC/Library/Documentation/src/DeforaOS Manual Pages" &&
+	(cd "$ROOT/$SRC/Library/Documentation/src/DeforaOS Manual Pages" &&
 		$CONFIGURE &&
 		$MAKE &&
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
 		$FIND "doc/manual" -name "*.html" -exec \
 			$INSTALL -- {} "$DESTDIR/htdocs/{}" \;)
 	echo "   $HOMEPAGE/doc/manual"
+
+	#generic documentation
+	echo ""
+	echo " * generic documentation"
+	$FIND "$SRC/System" "$SRC/Apps" -name "doc" | while read path; do
+		[ -x "$path/docbook.sh" -o -x "$path/gtkdoc.sh" ] || continue
+		(cd "$path" && $MAKE DESTDIR="$DESTDIR" PREFIX="/" \
+				install > "$DEVNULL")
+	done
+	echo "   $HOMEPAGE/doc/gtk-doc/html"
 }
 
 
