@@ -87,7 +87,7 @@ _deforaos_document_cvs()
 		$MAKE &&
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
 		$FIND "doc/manual" -name "*.html" \
-			-exec $INSTALL -- {} "$DESTDIR/htdocs/{}" \;)
+			-exec $INSTALL {} "$DESTDIR/htdocs/{}" \;)
 	echo "   $HOMEPAGE/doc/manual"
 
 	#generic documentation
@@ -152,7 +152,7 @@ _deforaos_document_git()
 		$MAKE &&
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
 		$FIND "doc/manual" -name "*.html" \
-			-exec $INSTALL -- {} "$DESTDIR/htdocs/{}" \;)
+			-exec $INSTALL {} "$DESTDIR/htdocs/{}" \;)
 	echo "   $HOMEPAGE/doc/manual"
 
 	#generic documentation
