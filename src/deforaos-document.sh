@@ -87,18 +87,19 @@ _deforaos_document_cvs()
 		$MAKE &&
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
 		$FIND "doc/manual" -name "*.html" \
-			-exec $INSTALL {} "$DESTDIR/htdocs/{}" \;)
-	echo "   $HOMEPAGE/doc/manual"
+			-exec $INSTALL {} "$DESTDIR/htdocs/{}" \;) > "$DEVNULL"
+	echo "   $HOMEPAGE/doc/manual (manual pages)"
 
 	#generic documentation
 	echo ""
 	echo " * generic documentation"
 	$FIND "$SRC/System" "$SRC/Apps" -name "doc" | while read path; do
 		[ -x "$path/docbook.sh" -o -x "$path/gtkdoc.sh" ] || continue
-		(cd "$path" && $MAKE DESTDIR="$DESTDIR" PREFIX="/" \
-				install > "$DEVNULL")
+		(cd "$path" && $MAKE DESTDIR="$DESTDIR" PREFIX="/" install) \
+			> "$DEVNULL"
 	done
-	echo "   $HOMEPAGE/doc/gtk-doc/html"
+	echo "   $HOMEPAGE/doc/gtk-doc/html (API documentation)"
+	echo "   $HOMEPAGE/doc/html (generic documentation)"
 }
 
 
@@ -152,18 +153,19 @@ _deforaos_document_git()
 		$MAKE &&
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
 		$FIND "doc/manual" -name "*.html" \
-			-exec $INSTALL {} "$DESTDIR/htdocs/{}" \;)
-	echo "   $HOMEPAGE/doc/manual"
+			-exec $INSTALL {} "$DESTDIR/htdocs/{}" \;) > "$DEVNULL"
+	echo "   $HOMEPAGE/doc/manual (manual pages)"
 
 	#generic documentation
 	echo ""
 	echo " * generic documentation"
 	$FIND "$ROOT/$SRC/System" "$ROOT/$SRC/Apps" -name "doc" | while read path; do
 		[ -x "$path/docbook.sh" -o -x "$path/gtkdoc.sh" ] || continue
-		(cd "$path" && $MAKE DESTDIR="$DESTDIR" PREFIX="/" \
-				install > "$DEVNULL")
+		(cd "$path" && $MAKE DESTDIR="$DESTDIR" PREFIX="/" install) \
+			> "$DEVNULL"
 	done
-	echo "   $HOMEPAGE/doc/gtk-doc/html"
+	echo "   $HOMEPAGE/doc/gtk-doc/html (API documentation)"
+	echo "   $HOMEPAGE/doc/html (generic documentation)"
 }
 
 
