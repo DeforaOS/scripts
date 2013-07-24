@@ -146,10 +146,12 @@ _deforaos_document_git()
 	#manual pages
 	echo ""
 	echo " * manual pages"
-	(cd "$ROOT/$SRC/Library/Documentation/src/DeforaOS Manual Pages" &&
+	path="$ROOT/$SRC/Library/Documentation/src/DeforaOS Manual Pages"
+	path="$path/DeforaOS-Manual-Pages-git"
+	(cd "$path" &&
 		$MAKE &&
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
-		$FIND "DeforaOS-Manual-Pages-git/doc/manual" -name "*.html" \
+		$FIND "doc/manual" -name "*.html" \
 			-exec $INSTALL -- {} "$DESTDIR/htdocs/{}" \;)
 	echo "   $HOMEPAGE/doc/manual"
 
