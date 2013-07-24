@@ -86,8 +86,8 @@ _deforaos_document_cvs()
 	(cd "$SRC/Data/Documentation/DeforaOS Manual Pages" &&
 		$MAKE &&
 		$MKDIR -- "$DESTDIR/htdocs/doc/manual" &&
-		$FIND "doc/manual" -name "*.html" -exec \
-			$INSTALL -- {} "$DESTDIR/htdocs/{}" \;)
+		$FIND "DeforaOS-Manual-Pages-git/doc/manual" -name "*.html" \
+			-exec $INSTALL -- {} "$DESTDIR/htdocs/{}" \;)
 	echo "   $HOMEPAGE/doc/manual"
 
 	#generic documentation
