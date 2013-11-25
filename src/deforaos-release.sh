@@ -69,6 +69,15 @@ _deforaos_release()
 		return $?
 	fi
 
+	for i in data/*.desktop; do
+		[ ! -e "$i" ] && break
+		basename="${i#data/}"
+		if [ "$basename" = "${basename#deforaos-}" ]; then
+			_error "data/$basename has no vendor prefix"
+			return $?
+		fi
+	done
+
 	if test -f "po/$PACKAGE.pot"; then
 		_info "Checking the translations..."
 		$RM -- "po/$PACKAGE.pot"			|| return 2
