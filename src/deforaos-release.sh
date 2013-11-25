@@ -20,8 +20,10 @@
 DEBUG=
 DEVNULL="/dev/null"
 HOMEPAGE="https://www.defora.org"
+PACKAGE=
 PROJECTCONF="project.conf"
 VERBOSE=0
+VERSION=
 #executables
 CVS="cvs"
 GIT="git"
@@ -38,8 +40,6 @@ WC="wc"
 _deforaos_release()
 {
 	version="$1"
-	PACKAGE=
-	VERSION=
 
 	while read line; do
 		case "$line" in
@@ -216,7 +216,7 @@ _release_tag_git()
 {
 	tag="$1"
 
-	$DEBUG $GIT tag "$tag"					|| return 2
+	$DEBUG $GIT tag "$tag" -m "$PACKAGE $VERSION"		|| return 2
 	$DEBUG $GIT push --tags					|| return 2
 }
 
