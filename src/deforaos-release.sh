@@ -165,6 +165,7 @@ _release_fetch_cvs()
 
 _release_fetch_git()
 {
+	$DEBUG $GIT checkout master				|| return 2
 	$DEBUG $GIT pull origin master
 }
 
