@@ -25,6 +25,7 @@ VERBOSE=0
 #executables
 CVS="cvs"
 GIT="git"
+GREP="grep"
 MAKE="make"
 RM="rm -f"
 TAR="tar"
@@ -66,6 +67,17 @@ _deforaos_release()
 	if [ $? -ne 0 ]; then
 		_error "Could not update the sources"
 		return $?
+	fi
+
+	if test -f "po/$PACKAGE.pot"; then
+		_info "Checking the translations..."
+		$RM -- "po/$PACKAGE.pot"			|| return 2
+		(cd "po" && $MAKE)				|| return 2
+		$GREP -q "fuzzy" -- po/*.po
+		if [ $? -eq 0 ]; then
+			_error "Some translations are fuzzy"
+			return $?
+		fi
 	fi
 
 	_info "Checking for differences..."
