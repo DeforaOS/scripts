@@ -111,7 +111,7 @@ EOF
 
 echo "Welcome to DeforaOS!"
 echo
-$PREFIX/bin/login
+while /usr/bin/true; do $PREFIX/bin/login; done
 EOF
 	[ $? -eq 0 ]						|| return 2
 	$DEBUG $SUDO $CHMOD -- "0755" "$DESTDIR/etc/rc"		|| return 2
