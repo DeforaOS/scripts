@@ -204,6 +204,7 @@ _image_iso_post()
 								|| return 2
 	$DEBUG $INSTALL -m 0755 "Apps/Unix/src/others/others-git/tools/oinit" \
 		"$DESTDIR/sbin/init"				|| return 2
+	#FIXME assumes the kernel is uncompressed
 	$DEBUG $INSTALL -m 0755 "$IMAGE_KERNEL" "$DESTDIR/netbsd" \
 								|| return 2
 	if [ -n "$IMAGE_RAMDISK" ]; then
@@ -212,11 +213,11 @@ _image_iso_post()
 	fi
 	$DEBUG $GZIP -9 "$DESTDIR/netbsd"			|| return 2
 	$DEBUG $INSTALL -m 0644 "$IMAGE_BOOT" "$DESTDIR/boot"	|| return 2
-	BOOT_SPLASH="vesa 640x480x8;boot netbsd"
+	BOOT_SPLASH="vesa 640x480x8;boot netbsd.gz"
 	if [ -n "$IMAGE_SPLASH" ]; then
 		$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_SPLASH" \
 			"$DESTDIR/netbsd.jpeg"			|| return 2
-		BOOT_SPLASH="vesa 640x480x8;splash /netbsd.jpeg;boot netbsd -z"
+		BOOT_SPLASH="vesa 640x480x8;splash /netbsd.jpeg;boot netbsd.gz -z"
 	fi
 	$SUDO sh -c "cat > $DESTDIR/boot.cfg" << EOF
 clear=1
@@ -225,7 +226,7 @@ banner====================
 banner=
 banner=Please choose an option from the following menu:
 menu=Boot DeforaOS:$BOOT_SPLASH
-menu=Boot DeforaOS (text mode):boot netbsd
+menu=Boot DeforaOS (text mode):boot netbsd.gz
 menu=Reboot:quit
 menu=Drop to boot prompt:prompt
 default=1
