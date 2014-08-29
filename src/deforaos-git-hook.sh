@@ -62,6 +62,7 @@ _hook_post_receive()
 }
 
 
+#hook_update
 _hook_update()
 {
 	if [ $# -ne 3 ]; then
