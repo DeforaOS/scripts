@@ -87,7 +87,7 @@ _hook_update()
 		#count the number of commits
 		commit_cnt=$((commit_cnt + 1))
 	done
-	echo "$commit_cnt commit(s) pushed ($files_cnt file(s) alterations)"
+	echo "$refname: $commit_cnt commit(s) pushed ($files_cnt file(s) alterations)"
 	return 0
 }
 
