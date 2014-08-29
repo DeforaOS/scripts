@@ -16,6 +16,8 @@ install:
 	$(INSTALL) -m 0755 deforaos-build.sh $(DESTDIR)$(PREFIX)/bin/deforaos-build.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 deforaos-document.sh $(DESTDIR)$(PREFIX)/bin/deforaos-document.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec
+	$(INSTALL) -m 0755 deforaos-git-hook.sh $(DESTDIR)$(PREFIX)/libexec/deforaos-git-hook.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 deforaos-lock.sh $(DESTDIR)$(PREFIX)/bin/deforaos-lock.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/bin
@@ -28,6 +30,7 @@ install:
 uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/bin/deforaos-build.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/bin/deforaos-document.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/deforaos-git-hook.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/bin/deforaos-lock.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/bin/deforaos-package.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/bin/deforaos-release.sh

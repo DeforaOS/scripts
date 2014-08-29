@@ -24,6 +24,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/Makefile \
 		$(PACKAGE)-$(VERSION)/src/deforaos-build.sh \
 		$(PACKAGE)-$(VERSION)/src/deforaos-document.sh \
+		$(PACKAGE)-$(VERSION)/src/deforaos-git-hook.sh \
 		$(PACKAGE)-$(VERSION)/src/deforaos-lock.sh \
 		$(PACKAGE)-$(VERSION)/src/deforaos-package.sh \
 		$(PACKAGE)-$(VERSION)/src/deforaos-release.sh \
