@@ -130,7 +130,7 @@ EOF
 	$DEBUG $SUDO $CHMOD -- "0644" "$DESTDIR/etc/fstab"	|| return 2
 	#/etc/group
 	$SUDO sh -c "cat > $DESTDIR/etc/group" << EOF
-wheel:*:0:
+wheel:*:0:root
 EOF
 	[ $? -eq 0 ]						|| return 2
 	$DEBUG $SUDO $CHMOD -- "0644" "$DESTDIR/etc/group"	|| return 2
