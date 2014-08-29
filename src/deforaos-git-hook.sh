@@ -41,16 +41,31 @@ _hook_post_commit()
 	fi
 	while read oldrev newrev refname; do
 		#XXX ignore errors
-		_hook_post_receive "$refname" "$oldrev" "$newrev"
+		_hook_update "$refname" "$oldrev" "$newrev"
 	done
 	return 0
 }
 
 
+#hook_post_receive
 _hook_post_receive()
 {
+	if [ $# -ne 0 ]; then
+		_usage "post-receive"
+		return $?
+	fi
+	while read oldrev newrev refname; do
+		#XXX ignore errors
+		_hook_update "$refname" "$oldrev" "$newrev"
+	done
+	return 0
+}
+
+
+_hook_update()
+{
 	if [ $# -ne 3 ]; then
-		_usage "post-receive refname oldrev newrev"
+		_usage "update refname oldrev newrev"
 		return $?
 	fi
 	refname="$1"
@@ -116,6 +131,10 @@ case "$hook" in
 		;;
 	"post-receive")
 		_hook_post_receive "$@"
+		exit $?
+		;;
+	"update")
+		_hook_update "$@"
 		exit $?
 		;;
 	*)
