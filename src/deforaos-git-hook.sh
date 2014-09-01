@@ -72,6 +72,14 @@ _hook_update()
 	refname="$1"
 	oldrev="$2"
 	newrev="$3"
+	branch=
+	type=$($GIT cat-file -t "$newrev")
+
+	case "$refname" in
+		refs/heads/*)
+			branch=${refname#refs/heads/}
+			;;
+	esac
 
 	#analyze each commit pushed
 	revisions=$($GIT rev-list "${oldrev}..${newrev}")
@@ -87,7 +95,11 @@ _hook_update()
 		#count the number of commits
 		commit_cnt=$((commit_cnt + 1))
 	done
-	echo "$refname: $commit_cnt commit(s) pushed ($files_cnt file(s) alterations)"
+	if [ -n "$branch" ]; then
+		echo "[$branch] $commit_cnt $type(s) pushed ($files_cnt file(s) alterations)"
+	else
+		echo "$refname: $commit_cnt $type(s) pushed ($files_cnt file(s) alterations)"
+	fi
 	return 0
 }
 
