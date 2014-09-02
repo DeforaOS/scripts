@@ -83,12 +83,14 @@ _hook_update()
 
 	#analyze each commit pushed
 	revisions=$($GIT rev-list "${oldrev}..${newrev}")
+	message=
 	commit_cnt=0
 	files_cnt=0
 	for revision in $revisions; do
 		#$GIT cat-file commit "$revision"
 		#count the file alterations
 		files=$($GIT log -n 1 --name-only --pretty=format:'' "$revision")
+		[ -z "$message" ] && message=$($GIT log -n 1 --oneline "$revision")
 		for file in $files; do
 			files_cnt=$((files_cnt + 1))
 		done
@@ -96,7 +98,11 @@ _hook_update()
 		commit_cnt=$((commit_cnt + 1))
 	done
 	if [ -n "$branch" ]; then
-		echo "[$branch] $commit_cnt $type(s) pushed ($files_cnt file(s) alterations)"
+		if [ $commit_cnt -eq 1 -a -n "$message" ]; then
+			echo "[$branch] $message ($files_cnt file(s) altered)"
+		else
+			echo "[$branch] $commit_cnt $type(s) pushed ($files_cnt file(s) altered)"
+		fi
 	else
 		echo "$refname: $commit_cnt $type(s) pushed ($files_cnt file(s) alterations)"
 	fi
