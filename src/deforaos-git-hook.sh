@@ -72,6 +72,8 @@ _hook_update()
 	refname="$1"
 	oldrev="$2"
 	newrev="$3"
+	author="$GL_USER"
+	repository="$GL_REPO"
 	branch=
 	type=$($GIT cat-file -t "$newrev")
 
@@ -99,12 +101,12 @@ _hook_update()
 	done
 	if [ -n "$branch" ]; then
 		if [ $commit_cnt -eq 1 -a -n "$message" ]; then
-			echo "[$branch] $message ($files_cnt file(s) altered)"
+			echo "$repository: $author [$branch] $message ($files_cnt file(s) alterations)"
 		else
-			echo "[$branch] $commit_cnt $type(s) pushed ($files_cnt file(s) altered)"
+			echo "$repository: $author [$branch] $commit_cnt $type(s) pushed ($files_cnt file(s) alterations)"
 		fi
 	else
-		echo "$refname: $commit_cnt $type(s) pushed ($files_cnt file(s) alterations)"
+		echo "$repository: $author [$refname] $commit_cnt $type(s) pushed ($files_cnt file(s) alterations)"
 	fi
 	return 0
 }
