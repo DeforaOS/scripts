@@ -76,43 +76,67 @@ _hook_update()
 	refname="$1"
 	oldrev="$2"
 	newrev="$3"
+	nullrev="0000000000000000000000000000000000000000"
 	author="$GL_USER"
+	[ -z "$author" ] && author="$USER"
 	repository="$GL_REPO"
 	branch=
-	type=$($GIT cat-file -t "$newrev")
 
+	#analyze the push
+	message=
+	[ -n "$repository" ] && message="$repository:"
+	[ -n "$author" ] && message="$message $author"
+	branch=
 	case "$refname" in
 		refs/heads/*)
 			branch=${refname#refs/heads/}
+			[ -n "$branch" ] && message="$message [$branch]"
+			;;
+		*)
+			[ -n "$refname" ] && message="$message [$refname]"
 			;;
 	esac
-
-	#analyze each commit pushed
-	revisions=$($GIT rev-list "${oldrev}..${newrev}")
-	message=
-	commit_cnt=0
-	all_files=
-	for revision in $revisions; do
-		#$GIT cat-file commit "$revision"
-		#count the file alterations
-		files=$($GIT log -n 1 --name-only --pretty=format:'' "$revision")
-		[ -z "$message" ] && message=$($GIT log -n 1 --oneline "$revision")
-		all_files="$all_files$files"
-		#count the number of commits
-		commit_cnt=$((commit_cnt + 1))
-	done
-	all_files=$(echo "$all_files" | $SED -e '/^$/d')
-	files_cnt=$(echo "$all_files" | $WC -l)
-	unique_files_cnt=$(echo "$all_files" | $SORT | $UNIQ | $WC -l)
-	if [ -n "$branch" ]; then
-		if [ $commit_cnt -eq 1 -a -n "$message" ]; then
-			echo "$repository: $author [$branch] $message ($files_cnt alterations in $unique_files_cnt files)"
-		else
-			echo "$repository: $author [$branch] $commit_cnt $type(s) pushed ($files_cnt alterations in $unique_files_cnt files)"
-		fi
+	if [ "$oldrev" = "$nullrev" ]; then
+		message="$message new branch"
+	elif [ "$newrev" = "$nullrev" ]; then
+		message="$message branch deleted"
 	else
-		echo "$repository: $author [$refname] $commit_cnt $type(s) pushed ($files_cnt alterations in $unique_files_cnt files)"
+		commit_cnt=0
+		all_files=
+		revisions=$($GIT rev-list "${oldrev}..${newrev}")
+		type=$($GIT cat-file -t "$newrev")
+		log=
+		for revision in $revisions; do
+			#$GIT cat-file commit "$revision"
+			#obtain the first log message
+			[ -z "$log" ] && log=$($GIT log -n 1 --oneline "$revision")
+			#count the file alterations
+			files=$($GIT log -n 1 --name-only --pretty=format:'' "$revision")
+			all_files="$all_files$files"
+			#count the number of commits
+			commit_cnt=$((commit_cnt + 1))
+		done
+		all_files=$(echo "$all_files" | $SED -e '/^$/d')
+		files_cnt=$(echo "$all_files" | $WC -l)
+		unique_files_cnt=$(echo "$all_files" | $SORT | $UNIQ | $WC -l)
+		if [ $commit_cnt -eq 1 -a -n "$log" ]; then
+			message="$message $log"
+		else
+			message="$message $commit_cnt $type(s) pushed"
+		fi
+		message="$message ($files_cnt"
+		if [ $files_cnt -lt 2 ]; then
+			message="$message alteration"
+		else
+			message="$message alterations"
+		fi
+		if [ $unique_files_cnt -lt 2 ]; then
+			message="$message in $unique_files_cnt file)"
+		else
+			message="$message in $unique_files_cnt files)"
+		fi
 	fi
+	echo "$message"
 	return 0
 }
 
