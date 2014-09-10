@@ -87,26 +87,27 @@ _hook_update()
 	revisions=$($GIT rev-list "${oldrev}..${newrev}")
 	message=
 	commit_cnt=0
-	files_cnt=0
+	all_files=
 	for revision in $revisions; do
 		#$GIT cat-file commit "$revision"
 		#count the file alterations
 		files=$($GIT log -n 1 --name-only --pretty=format:'' "$revision")
 		[ -z "$message" ] && message=$($GIT log -n 1 --oneline "$revision")
-		for file in $files; do
-			files_cnt=$((files_cnt + 1))
-		done
+		all_files="$all_files$files"
 		#count the number of commits
 		commit_cnt=$((commit_cnt + 1))
 	done
+	all_files=`echo "$all_files" | sed -e '/^$/d'`
+	files_cnt=`echo "$all_files" | wc -l`
+	unique_files_cnt=`echo "$all_files" | sort | uniq | wc -l`
 	if [ -n "$branch" ]; then
 		if [ $commit_cnt -eq 1 -a -n "$message" ]; then
-			echo "$repository: $author [$branch] $message ($files_cnt file(s) alterations)"
+			echo "$repository: $author [$branch] $message ($files_cnt alterations in $unique_files_cnt files)"
 		else
-			echo "$repository: $author [$branch] $commit_cnt $type(s) pushed ($files_cnt file(s) alterations)"
+			echo "$repository: $author [$branch] $commit_cnt $type(s) pushed ($files_cnt alterations in $unique_files_cnt files)"
 		fi
 	else
-		echo "$repository: $author [$refname] $commit_cnt $type(s) pushed ($files_cnt file(s) alterations)"
+		echo "$repository: $author [$refname] $commit_cnt $type(s) pushed ($files_cnt alterations in $unique_files_cnt files)"
 	fi
 	return 0
 }
