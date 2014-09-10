@@ -97,9 +97,9 @@ _hook_update()
 		#count the number of commits
 		commit_cnt=$((commit_cnt + 1))
 	done
-	all_files=`echo "$all_files" | sed -e '/^$/d'`
-	files_cnt=`echo "$all_files" | wc -l`
-	unique_files_cnt=`echo "$all_files" | sort | uniq | wc -l`
+	all_files=$(echo "$all_files" | sed -e '/^$/d')
+	files_cnt=$(echo "$all_files" | wc -l)
+	unique_files_cnt=$(echo "$all_files" | sort | uniq | wc -l)
 	if [ -n "$branch" ]; then
 		if [ $commit_cnt -eq 1 -a -n "$message" ]; then
 			echo "$repository: $author [$branch] $message ($files_cnt alterations in $unique_files_cnt files)"
