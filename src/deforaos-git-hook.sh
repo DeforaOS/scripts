@@ -132,8 +132,10 @@ _hook_update()
 		unique_files_cnt=$(echo "$all_files" | $SORT | $UNIQ | _count_lines)
 		if [ $commit_cnt -eq 1 -a -n "$log" ]; then
 			message="$message $log"
+		elif [ $commit_cnt -lt 2 ]; then
+			message="$message $commit_cnt $type pushed"
 		else
-			message="$message $commit_cnt $type(s) pushed"
+			message="$message $commit_cnt ${type}s pushed"
 		fi
 		message="$message ($files_cnt"
 		if [ $files_cnt -lt 2 ]; then
