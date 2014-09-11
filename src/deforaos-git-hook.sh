@@ -24,10 +24,21 @@ GIT="git"
 SED="sed"
 SORT="sort"
 UNIQ="uniq"
-WC="wc"
 
 
 #functions
+#count_lines
+_count_lines()
+{
+	lines_cnt=0
+
+	while read line; do
+		lines_cnt=$((lines_cnt + 1))
+	done
+	echo "$lines_cnt"
+}
+
+
 #error
 _error()
 {
@@ -117,8 +128,8 @@ _hook_update()
 			commit_cnt=$((commit_cnt + 1))
 		done
 		all_files=$(echo "$all_files" | $SED -e '/^$/d')
-		files_cnt=$(echo "$all_files" | $WC -l)
-		unique_files_cnt=$(echo "$all_files" | $SORT | $UNIQ | $WC -l)
+		files_cnt=$(echo "$all_files" | _count_lines)
+		unique_files_cnt=$(echo "$all_files" | $SORT | $UNIQ | _count_lines)
 		if [ $commit_cnt -eq 1 -a -n "$log" ]; then
 			message="$message $log"
 		else
