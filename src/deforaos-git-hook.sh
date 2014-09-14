@@ -115,7 +115,7 @@ _hook_update()
 			;;
 	esac
 	if [ "$oldrev" = "$nullrev" ]; then
-		message="$message new $type"
+		message="$message new $type at ${newrev:0:8}"
 	elif [ "$newrev" = "$nullrev" ]; then
 		message="$message $type deleted"
 	else
