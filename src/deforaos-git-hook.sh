@@ -115,7 +115,7 @@ _hook_update()
 			;;
 	esac
 	if [ "$oldrev" = "$nullrev" ]; then
-		message="$message new $type at ${newrev:0:8}"
+		message="$message new $type at $(_shorten 8 "$newrev")"
 	elif [ "$newrev" = "$nullrev" ]; then
 		message="$message $type deleted"
 	else
@@ -158,6 +158,13 @@ _hook_update()
 	fi
 	echo "$message"
 	return 0
+}
+
+
+#shorten
+_shorten()
+{
+	echo "$2" | $SED -e "s/^\\(.\\{$1\\}\\).*\$/\\1/"
 }
 
 
