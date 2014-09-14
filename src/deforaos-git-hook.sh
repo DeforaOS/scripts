@@ -18,6 +18,7 @@
 
 #environment
 #variables
+GITWEB=
 PROGNAME="deforaos-git-hook.sh"
 #executables
 GIT="git"
@@ -157,7 +158,19 @@ _hook_update()
 		fi
 	fi
 	echo "$message"
+	[ "$type" = "commit" ] && _link "$repository" "$newrev"
 	return 0
+}
+
+
+#link
+_link()
+{
+	repository="$1"
+	rev="$2"
+
+	[ -n "$GITWEB" ] || return 0
+	echo "$GITWEB?p=${GL_REPO}.git;a=commit;h=$(_shorten 8 "$rev")"
 }
 
 
