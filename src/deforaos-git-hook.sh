@@ -92,6 +92,7 @@ _hook_update()
 	[ -z "$author" ] && author="$USER"
 	repository="$GL_REPO"
 	branch=
+	type="push"
 
 	#analyze the push
 	message=
@@ -102,15 +103,21 @@ _hook_update()
 		refs/heads/*)
 			branch=${refname#refs/heads/}
 			[ -n "$branch" ] && message="$message [$branch]"
+			type="branch"
+			;;
+		refs/tags/*)
+			tag=${refname#refs/tags/}
+			[ -n "$tag" ] && message="$message [$tag]"
+			type="tag"
 			;;
 		*)
 			[ -n "$refname" ] && message="$message [$refname]"
 			;;
 	esac
 	if [ "$oldrev" = "$nullrev" ]; then
-		message="$message new branch"
+		message="$message new $type"
 	elif [ "$newrev" = "$nullrev" ]; then
-		message="$message branch deleted"
+		message="$message $type deleted"
 	else
 		commit_cnt=0
 		all_files=
