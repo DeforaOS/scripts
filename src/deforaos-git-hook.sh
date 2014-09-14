@@ -96,8 +96,8 @@ _hook_update()
 
 	#analyze the push
 	message=
-	[ -n "$repository" ] && message="$repository:"
-	[ -n "$author" ] && message="$message $author"
+	[ -n "$repository" ] && message="$repository: "
+	[ -n "$author" ] && message="$message$author"
 	branch=
 	case "$refname" in
 		refs/heads/*)
