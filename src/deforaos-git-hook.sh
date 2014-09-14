@@ -116,9 +116,10 @@ _hook_update()
 			;;
 	esac
 	if [ "$oldrev" = "$nullrev" ]; then
-		message="$message new $type at $(_shorten 8 "$newrev")"
+		echo "$message new $type at $(_shorten 8 "$newrev")"
+		_link "$repository" "$newrev"
 	elif [ "$newrev" = "$nullrev" ]; then
-		message="$message $type deleted"
+		echo "$message $type deleted"
 	else
 		commit_cnt=0
 		all_files=
@@ -156,9 +157,9 @@ _hook_update()
 		else
 			message="$message in $unique_files_cnt files)"
 		fi
+		echo "$message"
+		_link "$repository" "$newrev"
 	fi
-	echo "$message"
-	[ "$type" = "commit" ] && _link "$repository" "$newrev"
 	return 0
 }
 
