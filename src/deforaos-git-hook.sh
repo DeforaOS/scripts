@@ -158,7 +158,7 @@ _hook_update()
 			message="$message in $unique_files_cnt files)"
 		fi
 		echo "$message"
-		_link "$repository" "$newrev"
+		[ $commit_cnt -eq 1 ] && _link "$repository" "$newrev"
 	fi
 	return 0
 }
