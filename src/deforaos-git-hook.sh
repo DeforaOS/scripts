@@ -20,6 +20,7 @@
 #variables
 GITWEB=
 PROGNAME="deforaos-git-hook.sh"
+REDMINE=
 #executables
 GIT="git"
 SED="sed"
@@ -169,9 +170,10 @@ _link()
 {
 	repository="$1"
 	rev="$2"
+	shortrev=$(_shorten 8 "$rev")
 
-	[ -n "$GITWEB" ] || return 0
-	echo "$GITWEB?p=${GL_REPO}.git;a=commit;h=$(_shorten 8 "$rev")"
+	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=commit;h=$shortrev"
+	[ -n "$REDMINE" ] && echo "$REDMINE/projects/${repository%.git}/repository/revisions/$shortrev"
 }
 
 
