@@ -25,6 +25,7 @@ REDMINE=
 GIT="git"
 SED="sed"
 SORT="sort"
+TR="tr"
 UNIQ="uniq"
 
 
@@ -173,7 +174,14 @@ _link()
 	shortrev=$(_shorten 8 "$rev")
 
 	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=commit;h=$shortrev"
-	[ -n "$REDMINE" ] && echo "$REDMINE/projects/${repository%.git}/repository/revisions/$shortrev"
+	[ -n "$REDMINE" ] && echo "$REDMINE/projects/${repository}/repository/revisions/$shortrev" | _tolower
+}
+
+
+#_tolower
+_tolower()
+{
+	$TR A-Z a-z
 }
 
 
