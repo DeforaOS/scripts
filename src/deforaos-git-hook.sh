@@ -119,7 +119,7 @@ _hook_update()
 	esac
 	if [ "$oldrev" = "$nullrev" ]; then
 		echo "$message new $type at $(_shorten 8 "$newrev")"
-		_link "$repository" "$newrev"
+		_link_commit "$repository" "$newrev"
 	elif [ "$newrev" = "$nullrev" ]; then
 		echo "$message $type deleted"
 	else
@@ -160,14 +160,29 @@ _hook_update()
 			message="$message in $unique_files_cnt files)"
 		fi
 		echo "$message"
-		[ $commit_cnt -eq 1 ] && _link "$repository" "$newrev"
+		if [ $commit_cnt -eq 1 ]; then
+			_link_commit "$repository" "$newrev"
+		elif [ -n "$branch" ]; then
+			_link_branch "$repository" "$branch"
+		fi
 	fi
 	return 0
 }
 
 
 #link
-_link()
+_link_branch()
+{
+	repository="$1"
+	branch="$2"
+
+	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=tree;hb=$branch"
+	[ -n "$REDMINE" ] && echo "$REDMINE/projects/${repository}/repository/show?rev=$branch" | _tolower
+}
+
+
+#link_commit
+_link_commit()
 {
 	repository="$1"
 	rev="$2"
