@@ -177,7 +177,7 @@ _link_branch()
 	branch="$2"
 
 	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=tree;hb=$branch"
-	[ -n "$REDMINE" ] && echo "$REDMINE/projects/${repository}/repository/show?rev=$branch" | _tolower
+	[ -n "$REDMINE" ] && echo "$REDMINE/repository/${repository}/show?rev=$branch" | _tolower
 }
 
 
@@ -189,7 +189,7 @@ _link_commit()
 	shortrev=$(_shorten 8 "$rev")
 
 	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=commit;h=$shortrev"
-	[ -n "$REDMINE" ] && echo "$REDMINE/projects/${repository}/repository/revisions/$shortrev" | _tolower
+	[ -n "$REDMINE" ] && echo "$REDMINE/repository/${repository}/revisions/$shortrev" | _tolower
 }
 
 
