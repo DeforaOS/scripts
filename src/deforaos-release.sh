@@ -25,6 +25,7 @@ PROJECTCONF="project.conf"
 VERBOSE=0
 VERSION=
 #executables
+CONFIGURE="configure"
 CVS="cvs"
 GIT="git"
 GREP="grep"
@@ -89,6 +90,9 @@ _deforaos_release()
 		fi
 	fi
 
+	#run configure again
+	_release_configure
+
 	_info "Checking for differences..."
 	_release_diff
 	if [ $? -ne 0 ]; then
@@ -139,6 +143,15 @@ _deforaos_release()
 	_info " * publish a news on $HOMEPAGE/os/news/submit"
 	_info " * tweet (possibly via freecode)"
 	_info " * package where appropriate (see deforaos-package.sh)"
+}
+
+_release_configure()
+{
+	if [ -f "project.conf" ]; then
+		$DEBUG $CONFIGURE
+		return $?
+	fi
+	return 0
 }
 
 _release_diff()
