@@ -70,6 +70,7 @@ _deforaos_release()
 		return $?
 	fi
 
+	#checking the desktop files
 	for i in data/*.desktop; do
 		[ ! -e "$i" ] && break
 		basename="${i#data/}"
