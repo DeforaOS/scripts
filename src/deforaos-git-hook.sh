@@ -125,7 +125,8 @@ _hook_update()
 	else
 		commit_cnt=0
 		all_files=
-		revisions=$($GIT rev-list "${oldrev}..${newrev}")
+		base=$($GIT merge-base "$oldrev" "$newrev")
+		revisions=$($GIT rev-list "${base}..${newrev}")
 		type=$($GIT cat-file -t "$newrev")
 		log=
 		for revision in $revisions; do
@@ -158,6 +159,9 @@ _hook_update()
 			message="$message in $unique_files_cnt file)"
 		else
 			message="$message in $unique_files_cnt files)"
+		fi
+		if [ "$oldrev" != "$base" ]; then
+			message="$message (force push)"
 		fi
 		echo "$message"
 		if [ $commit_cnt -eq 1 ]; then
