@@ -83,7 +83,7 @@ _deforaos_release()
 		fi
 	done
 
-	if test -f "po/$PACKAGE.pot"; then
+	if [ -f "po/$PACKAGE.pot" ]; then
 		_info "Checking the translations..."
 		$RM -- "po/$PACKAGE.pot"			|| return 2
 		(cd "po" && $MAKE)				|| return 2
