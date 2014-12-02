@@ -134,7 +134,7 @@ _deforaos_release()
 
 _release_configure()
 {
-	if [ -f "project.conf" ]; then
+	if [ -f "$PROJECTCONF" ]; then
 		$DEBUG $CONFIGURE
 		return $?
 	fi
