@@ -107,8 +107,9 @@ _deforaos_release()
 	fi
 
 	_info "Creating the archive..."
+	archive="$PACKAGE-$VERSION.tar.gz"
 	$DEBUG $MAKE distcheck
-	if [ $? -ne 0 ]; then
+	if [ $? -ne 0 -o ! -f "$archive" ]; then
 		_error "Could not create the archive"
 		return $?
 	fi
