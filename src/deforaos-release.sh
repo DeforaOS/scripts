@@ -156,7 +156,7 @@ _release_diff()
 _release_diff_cvs()
 {
 	#XXX this method may be obsoleted in a future version of CVS
-	$DEBUG $CVS diff
+	$DEBUG $CVS diff > "$DEVNULL"
 }
 
 _release_diff_git()
