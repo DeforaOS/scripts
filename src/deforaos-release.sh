@@ -19,6 +19,7 @@
 #environment
 DEBUG=
 DEVNULL="/dev/null"
+DRYRUN=0
 FREECODE="https://freecode.com/users/$USERNAME"
 GIT_BRANCH="master"
 HOMEPAGE="https://www.defora.org"
@@ -195,15 +196,16 @@ _release_tag()
 {
 	tag="$1"
 
-	if [ -d "CVS" ]; then
+	if [ $DRYRUN -ne 0 ]; then
+		return 0
+	elif [ -d "CVS" ]; then
 		_release_tag_cvs "$tag"
 		return $?
 	elif [ -d ".git" ]; then
 		_release_tag_git "$tag"
 		return $?
-	else
-		return 2
 	fi
+	return 2
 }
 
 _release_tag_cvs()
@@ -249,8 +251,9 @@ _info()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-Dv][-O name=value...] version" 1>&2
+	echo "Usage: $PROGNAME [-Dnv][-O name=value...] version" 1>&2
 	echo "  -D	Run in debugging mode" 1>&2
+	echo "  -n	Do not actually publish changes (dry-run)" 1>&2
 	echo "  -v	Verbose mode" 1>&2
 	return 1
 }
@@ -258,13 +261,16 @@ _usage()
 
 #main
 #parse options
-while getopts "DvO:" name; do
+while getopts "DnvO:" name; do
 	case "$name" in
 		D)
 			DEBUG="_debug"
 			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
+		n)
+			DRYRUN=1
 			;;
 		v)
 			VERBOSE=1
