@@ -124,7 +124,8 @@ _deforaos_release()
 	fi
 
 	#all tests passed
-	_info "$archive is ready for release"
+	_info "$PACKAGE version $VERSION is ready for release in"
+	_info "$archive."
 	_info "The following steps are:"
 	_info " * upload to $HOMEPAGE/os/project/submit/@ID@/$PACKAGE?type=release"
 	_info " * publish a news on $HOMEPAGE/os/news/submit"
