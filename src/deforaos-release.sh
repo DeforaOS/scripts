@@ -24,6 +24,7 @@ HOMEPAGE="https://www.defora.org"
 PACKAGE=
 PROGNAME="deforaos-release.sh"
 PROJECTCONF="project.conf"
+VENDOR="deforaos"
 VERBOSE=0
 VERSION=
 #executables
@@ -76,7 +77,7 @@ _deforaos_release()
 	for i in data/*.desktop; do
 		[ ! -e "$i" ] && break
 		basename="${i#data/}"
-		if [ "$basename" = "${basename#deforaos-}" ]; then
+		if [ "$basename" = "${basename#$VENDOR-}" ]; then
 			_error "data/$basename has no vendor prefix"
 			return $?
 		fi
