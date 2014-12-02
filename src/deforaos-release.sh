@@ -105,27 +105,9 @@ _deforaos_release()
 	fi
 
 	_info "Creating the archive..."
-	$DEBUG $MAKE dist
+	$DEBUG $MAKE distcheck
 	if [ $? -ne 0 ]; then
 		_error "Could not create the archive"
-		return $?
-	fi
-
-	#check the archive
-	_info "Checking the archive..."
-	archive="$PACKAGE-$VERSION.tar.gz"
-	$DEBUG $TAR -xzf "$archive"
-	if [ $? -ne 0 ]; then
-		$DEBUG $RM -r -- "$PACKAGE-$VERSION"
-		_error "Could not extract the archive"
-		return $?
-	fi
-	(cd "$PACKAGE-$VERSION" && $DEBUG $MAKE)
-	res=$?
-	$DEBUG $RM -r -- "$PACKAGE-$VERSION"
-	if [ $res -ne 0 ]; then
-		$DEBUG $RM -- "$archive"
-		_error "Could not validate the archive"
 		return $?
 	fi
 
