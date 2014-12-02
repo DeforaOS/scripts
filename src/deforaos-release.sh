@@ -114,8 +114,7 @@ _deforaos_release()
 	fi
 
 	#tagging the release
-	tag=$(echo $version | $TR . -)
-	tag="${PACKAGE}_$tag"
+	tag="${PACKAGE}_$(echo "$version" | $TR . -)"
 	_info "Tagging the sources as $tag..."
 	_release_tag "$tag"
 	if [ $? -ne 0 ]; then
