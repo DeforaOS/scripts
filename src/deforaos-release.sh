@@ -19,6 +19,7 @@
 #environment
 DEBUG=
 DEVNULL="/dev/null"
+GIT_BRANCH="master"
 HOMEPAGE="https://www.defora.org"
 PACKAGE=
 PROGNAME="deforaos-release.sh"
@@ -201,8 +202,10 @@ _release_fetch_cvs()
 
 _release_fetch_git()
 {
-	$DEBUG $GIT checkout master				|| return 2
-	$DEBUG $GIT pull origin master
+	if [ -n "$GIT_BRANCH" ]; then
+		$DEBUG $GIT checkout "$GIT_BRANCH"		|| return 2
+	fi
+	$DEBUG $GIT pull
 }
 
 _release_tag()
