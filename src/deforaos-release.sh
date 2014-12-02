@@ -164,6 +164,7 @@ _release_diff_cvs()
 
 _release_diff_git()
 {
+	$DEBUG $GIT status > "$DEVNULL"
 	$DEBUG $GIT diff --quiet
 }
 
