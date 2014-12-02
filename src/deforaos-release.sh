@@ -21,6 +21,7 @@ DEBUG=
 DEVNULL="/dev/null"
 HOMEPAGE="https://www.defora.org"
 PACKAGE=
+PROGNAME="deforaos-release.sh"
 PROJECTCONF="project.conf"
 VERBOSE=0
 VERSION=
@@ -246,7 +247,7 @@ _debug()
 #error
 _error()
 {
-	echo "deforaos-release.sh: error: $@" 1>&2
+	echo "$PROGNAME: error: $@" 1>&2
 	return 2
 }
 
@@ -254,7 +255,7 @@ _error()
 #info
 _info()
 {
-	[ "$VERBOSE" -ne 0 ] && echo "deforaos-release.sh: $@" 1>&2
+	[ "$VERBOSE" -ne 0 ] && echo "$PROGNAME: $@" 1>&2
 	return 0
 }
 
@@ -262,7 +263,7 @@ _info()
 #usage
 _usage()
 {
-	echo "Usage: deforaos-release.sh [-Dv][-O name=value...] version" 1>&2
+	echo "Usage: $PROGNAME [-Dv][-O name=value...] version" 1>&2
 	echo "  -D	Run in debugging mode" 1>&2
 	echo "  -v	Verbose mode" 1>&2
 	return 1
