@@ -161,8 +161,7 @@ _release_diff_cvs()
 
 _release_diff_git()
 {
-	lines=$($DEBUG $GIT diff | $WC -l)
-	[ $lines -eq 0 ] || return 2
+	$DEBUG $GIT diff -q
 }
 
 _release_fetch()
