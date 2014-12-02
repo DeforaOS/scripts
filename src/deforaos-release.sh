@@ -162,7 +162,7 @@ _release_diff_cvs()
 
 _release_diff_git()
 {
-	$DEBUG $GIT diff -q
+	$DEBUG $GIT diff --quiet
 }
 
 _release_fetch()
