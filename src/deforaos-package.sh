@@ -193,7 +193,7 @@ _package_debian()
 	pkgname=$(echo "$DEBIAN_PREFIX$PACKAGE" | $TR A-Z a-z)
 
 	$DEBUG $RM -r -- "debian"				|| return 2
-	$DEBUG $MKDIR -- "debian"				|| return 2
+	$DEBUG $MKDIR -- "debian" "debian/source"		|| return 2
 
 	#check the license
 	license=
@@ -230,6 +230,14 @@ _package_debian()
 	#debian/menu
 	_debian_menu
 
+	#debian/source/format
+	_debian_source_format > "debian/source/format"
+	if [ $? -ne 0 ]; then
+		$DEBUG $RM -r -- "debian"
+		_error "Could not create debian/source/format"
+		return 2
+	fi
+
 	#build the package
 	_info "Building the package..."
 	$DPKG_BUILDPACKAGE
@@ -264,7 +272,7 @@ _debian_changelog()
 
 _debian_compat()
 {
-	echo "7"
+	echo "9"
 }
 
 _debian_control()
@@ -279,7 +287,7 @@ _debian_control()
 	fi
 
 	#build dependencies
-	depends="debhelper (>= 7.0.50~)"
+	depends="debhelper (>= 9)"
 	[ $DEPEND_docbookxsl -eq 1 ] && depends="$depends, docbook-xsl"
 	[ $DEPEND_xgettext -eq 1 ] && depends="$depends, gettext"
 	[ $DEPEND_pkgconfig -eq 1 ] && depends="$depends, pkg-config"
@@ -287,10 +295,10 @@ _debian_control()
 	cat << EOF
 Source: $pkgname
 Section: $section
-Priority: extra
+Priority: optional
 Maintainer: $FULLNAME <$EMAIL>
 Build-Depends: $depends
-Standards-Version: 3.8.4
+Standards-Version: 3.9.4
 Homepage: $HOMEPAGE/os/project/$ID/$PACKAGE
 
 Package: $pkgname$major
@@ -492,36 +500,21 @@ _debian_rules()
 	[ -z "${PACKAGE%%lib*}" ] && destdir="\$(PWD)/debian/tmp"
 	cat << EOF
 #!/usr/bin/make -f
-# -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
-
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
-# These are used for cross-compiling and for saving the configure script
-# from having to guess our platform (since we know it already)
-DEB_HOST_GNU_TYPE   ?= \$(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
-DEB_BUILD_GNU_TYPE  ?= \$(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-ifneq (\$(DEB_HOST_GNU_TYPE),\$(DEB_BUILD_GNU_TYPE))
-CC=\$(DEB_HOST_GNU_TYPE)-gcc
-
-override_dh_auto_build:
-	\$(MAKE) PREFIX="/usr" CC="\$(CC)"
-else
-override_dh_auto_build:
-	\$(MAKE) PREFIX="/usr"
-endif
 
 %:
 	dh \$@
 
+override_dh_auto_build:
+	\$(MAKE) PREFIX="/usr"
+
 override_dh_auto_install:
 	\$(MAKE) DESTDIR="$destdir" PREFIX="/usr" install
 EOF
+}
+
+_debian_source_format()
+{
+	echo "3.0 (quilt)"
 }
 
 
