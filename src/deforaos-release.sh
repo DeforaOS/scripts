@@ -20,6 +20,7 @@
 DEBUG=
 DEVNULL="/dev/null"
 DRYRUN=0
+FORCE=0
 FREECODE="https://freecode.com/users/$USERNAME"
 GIT_BRANCH="master"
 HOMEPAGE="https://www.defora.org"
@@ -108,7 +109,9 @@ _deforaos_release()
 
 	_info "Creating the archive..."
 	archive="$PACKAGE-$VERSION.tar.gz"
-	$DEBUG $MAKE distcheck
+	target="distcheck"
+	[ $FORCE -ne 0 ] && target="dist"
+	$DEBUG $MAKE "$target"
 	if [ $? -ne 0 -o ! -f "$archive" ]; then
 		_error "Could not create the archive"
 		return $?
@@ -253,8 +256,9 @@ _info()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-Dnv][-O name=value...] version" 1>&2
+	echo "Usage: $PROGNAME [-Dfnv][-O name=value...] version" 1>&2
 	echo "  -D	Run in debugging mode" 1>&2
+	echo "  -f	Do not perform tests" 1>&2
 	echo "  -n	Do not actually publish changes (dry-run)" 1>&2
 	echo "  -v	Verbose mode" 1>&2
 	return 1
@@ -263,13 +267,16 @@ _usage()
 
 #main
 #parse options
-while getopts "DnvO:" name; do
+while getopts "DfnvO:" name; do
 	case "$name" in
 		D)
 			DEBUG="_debug"
 			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
+		f)
+			FORCE=1
 			;;
 		n)
 			DRYRUN=1
