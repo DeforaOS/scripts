@@ -59,6 +59,7 @@ DEPEND_gtkdoc=0
 DEPEND_pkgconfig=0
 DEPEND_xgettext=0
 #method-specific
+DEBIAN_FILES="compat control copyright rules"
 DEBIAN_PREFIX="deforaos-"
 PKGSRC_PREFIX="deforaos-"
 PKGSRC_ROOT="/usr/pkgsrc"
@@ -206,7 +207,7 @@ _package_debian()
 	[ -z "$license" ] && _warning "Unknown license"
 
 	#debian files
-	for i in compat control copyright rules; do
+	for i in $DEBIAN_FILES; do
 		_info "Creating debian/$i..."
 		"_debian_$i" > "debian/$i"
 		if [ $? -ne 0 ]; then
