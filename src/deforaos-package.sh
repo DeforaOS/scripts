@@ -19,9 +19,10 @@
 #environment
 DEBUG=
 DEVNULL="/dev/null"
+DOMAIN="defora.org"
 EMAIL=
 FULLNAME=
-HOMEPAGE="http://www.defora.org"
+HOMEPAGE="http://www.$DOMAIN"
 ID="@ID@"
 LANG="C"
 LICENSE=
@@ -130,7 +131,7 @@ _package_guess_dependencies()
 _package_guess_email()
 {
 	[ -d ".git" ] && EMAIL=$($GIT config user.email)
-	[ -n "$EMAIL" ] || EMAIL="$USER@defora.org"
+	[ -n "$EMAIL" ] || EMAIL="$USER@$DOMAIN"
 }
 
 _package_guess_fullname()
