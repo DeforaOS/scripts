@@ -393,12 +393,13 @@ EOF
 _debian_lintian()
 {
 	arch="$($DPKG --print-architecture)"
-	major=0
+	major=
+	[ -z "${PACKAGE%%lib*}" ] && major=0
 
 	_info "Checking the package..."
 	#XXX only check for the packages built this time
 	for i in "../${pkgname}_$VERSION-${revision}_$arch.deb" \
-		"../$pkgname$major_$VERSION-${revision}_$arch.deb" \
+		"../$pkgname${major}_$VERSION-${revision}_$arch.deb" \
 		"../$pkgname-dev_$VERSION-${revision}_$arch.deb"; do
 		[ -f "$i" ] || continue
 
