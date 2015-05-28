@@ -322,7 +322,8 @@ _package_debian()
 
 	#build the package
 	_info "Building the package..."
-	$DEBUG $DPKG_BUILDPACKAGE
+	#XXX ugly workaround
+	PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" $DEBUG $DPKG_BUILDPACKAGE
 	#XXX ignore errors if the command is not installed
 	if [ $? -eq 127 ]; then
 		_warning "Could not build the package"
