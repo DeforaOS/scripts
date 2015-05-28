@@ -512,6 +512,8 @@ _debian_rules()
 
 %:
 	dh \$@
+EOF
+	[ -f "$PROJECTCONF" ] && $CAT << EOF
 
 override_dh_auto_build:
 	\$(MAKE) PREFIX="/usr"
