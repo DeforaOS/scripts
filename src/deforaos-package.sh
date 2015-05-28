@@ -36,6 +36,7 @@ CKSUM="cksum"
 CP="cp"
 CUT="cut"
 DCH="dch"
+DPKG="dpkg"
 DPKG_BUILDPACKAGE="dpkg-buildpackage -rfakeroot"
 FIND="find"
 GREP="grep"
@@ -386,7 +387,7 @@ EOF
 
 _debian_lintian()
 {
-	arch="$(dpkg --print-architecture)"
+	arch="$($DPKG --print-architecture)"
 	major=0
 
 	_info "Checking the package..."
