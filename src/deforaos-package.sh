@@ -229,7 +229,7 @@ _package_debian()
 {
 	pkgname=$(echo "$DEBIAN_PREFIX$PACKAGE" | $TR A-Z a-z)
 
-	([ $FORCE -eq 0 ] || $DEBUG $RM -r -- "debian")		|| return 2
+	([ $FORCE -eq 0 ] || $DEBUG $RM -r -- ".pc" "debian")	|| return 2
 
 	#check for changes
 	_info "Checking for changes..."
