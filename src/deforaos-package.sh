@@ -102,6 +102,31 @@ _deforaos_package()
 	_info "DeforaOS $PACKAGE $VERSION-$revision packaged"
 }
 
+_package_diff()
+{
+	if [ -d "CVS" ]; then
+		_package_diff_cvs
+		return $?
+	elif [ -d ".git" ]; then
+		_package_diff_git
+		return $?
+	else
+		return 2
+	fi
+}
+
+_package_diff_cvs()
+{
+	#XXX this method may be obsoleted in a future version of CVS
+	$DEBUG $CVS diff > "$DEVNULL"
+}
+
+_package_diff_git()
+{
+	$DEBUG $GIT status > "$DEVNULL"
+	$DEBUG $GIT diff --quiet
+}
+
 _package_guess_dependencies()
 {
 	#desktop database
@@ -201,6 +226,16 @@ _package_debian()
 	pkgname=$(echo "$DEBIAN_PREFIX$PACKAGE" | $TR A-Z a-z)
 
 	$DEBUG $RM -r -- "debian"				|| return 2
+
+	#check for changes
+	_info "Checking for changes..."
+	_package_diff
+	if [ $? -ne 0 ]; then
+		_error "The sources were modified"
+		return $?
+	fi
+
+	#initialization
 	$DEBUG $MKDIR -- "debian" "debian/source"		|| return 2
 
 	#check the license
