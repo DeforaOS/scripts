@@ -50,7 +50,7 @@ MAKE="make"
 MKDIR="mkdir -p"
 MV="mv"
 PKGLINT="pkglint"
-PREFIX="/usr/local"
+PREFIX=
 RM="rm -f"
 RMD160="rmd160"
 SHA1="sha1"
@@ -228,6 +228,7 @@ _package_guess_name()
 _package_debian()
 {
 	pkgname=$(echo "$DEBIAN_PREFIX$PACKAGE" | $TR A-Z a-z)
+	[ -n "$PREFIX" ] || PREFIX="/usr"
 
 	([ $FORCE -eq 0 ] || $DEBUG $RM -r -- ".pc" "debian")	|| return 2
 
@@ -617,6 +618,7 @@ _debian_source_format()
 _package_pkgsrc()
 {
 	revision="$1"
+	[ -n "$PREFIX" ] || PREFIX="/usr/pkg"
 
 	#the archive is needed
 	_info "Checking the source archive..."
