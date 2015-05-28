@@ -39,6 +39,7 @@ DCH="dch"
 DPKG="dpkg"
 DPKG_BUILDPACKAGE="dpkg-buildpackage -rfakeroot"
 FIND="find"
+GIT="git"
 GREP="grep"
 LINTIAN="lintian"
 MAKE="make"
@@ -128,12 +129,14 @@ _package_guess_dependencies()
 
 _package_guess_email()
 {
-	EMAIL="$USER@defora.org"
+	[ -d ".git" ] && EMAIL=$($GIT config user.email)
+	[ -n "$EMAIL" ] || EMAIL="$USER@defora.org"
 }
 
 _package_guess_fullname()
 {
-	FULLNAME="$USER"
+	[ -d ".git" ] && FULLNAME=$($GIT config user.name)
+	[ -n "$FULLNAME" ] || FULLNAME="$USER"
 }
 
 _package_guess_license()
