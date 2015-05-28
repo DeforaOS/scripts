@@ -80,11 +80,11 @@ _deforaos_package()
 		_error "Could not determine the package name or version"
 		return $?
 	fi
-	[ -z "$METHOD" ] && _package_guess_method
-	[ -z "$LICENSE" ] && _package_guess_license
+	[ -n "$METHOD" ] || _package_guess_method
+	[ -n "$LICENSE" ] || _package_guess_license
 	_package_guess_dependencies
-	[ -z "$EMAIL" ] && _package_guess_email
-	[ -z "$FULLNAME" ] && _package_guess_fullname
+	[ -n "$EMAIL" ] || _package_guess_email
+	[ -n "$FULLNAME" ] || _package_guess_fullname
 
 	#call the proper packaging function
 	case "$METHOD" in
@@ -210,7 +210,7 @@ _package_debian()
 			license="GPL-3"
 			;;
 	esac
-	[ -z "$license" ] && _warning "Unknown license"
+	[ -n "$license" ] || _warning "Unknown license"
 
 	#debian files
 	for i in $DEBIAN_FILES; do
@@ -261,8 +261,8 @@ _package_debian()
 
 _debian_changelog()
 {
-	[ -z "$DEBFULLNAME" ] && DEBFULLNAME="$FULLNAME"
-	[ -z "$DEBEMAIL" ] && DEBEMAIL="$EMAIL"
+	[ -n "$DEBFULLNAME" ] || DEBFULLNAME="$FULLNAME"
+	[ -n "$DEBEMAIL" ] || DEBEMAIL="$EMAIL"
 	DEBFULLNAME="$DEBFULLNAME" DEBEMAIL="$DEBEMAIL" $DCH --create \
 		--distribution "unstable" \
 		--package "$pkgname" --newversion "$VERSION-$revision" \
@@ -400,7 +400,7 @@ _debian_lintian()
 	for i in "../${pkgname}_$VERSION-${revision}_$arch.deb" \
 		"../$pkgname$major_$VERSION-${revision}_$arch.deb" \
 		"../$pkgname-dev_$VERSION-${revision}_$arch.deb"; do
-		[ ! -f "$i" ] && continue
+		[ -f "$i" ] || continue
 
 		$DEBUG $LINTIAN "$i"
 		#XXX ignore errors if the command is not installed
