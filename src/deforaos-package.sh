@@ -63,6 +63,7 @@ DEPEND_pkgconfig=0
 DEPEND_xgettext=0
 #method-specific
 DEBIAN_FILES="compat control copyright rules"
+DEBIAN_MESSAGE="Package generated automatically by deforaos-package.sh"
 DEBIAN_PREFIX="deforaos-"
 PKGSRC_PREFIX="deforaos-"
 PKGSRC_ROOT="/usr/pkgsrc"
@@ -265,7 +266,7 @@ _debian_changelog()
 	DEBFULLNAME="$DEBFULLNAME" DEBEMAIL="$DEBEMAIL" $DCH --create \
 		--distribution "unstable" \
 		--package "$pkgname" --newversion "$VERSION-$revision" \
-		"Package generated automatically by deforaos-package.sh"
+		"$DEBIAN_MESSAGE"
 	ret=$?
 
 	#XXX ignore errors if the command is not installed
