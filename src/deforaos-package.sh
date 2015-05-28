@@ -248,7 +248,7 @@ _package_debian()
 
 	#build the package
 	_info "Building the package..."
-	$DPKG_BUILDPACKAGE
+	$DEBUG $DPKG_BUILDPACKAGE
 	#XXX ignore errors if the command is not installed
 	if [ $? -eq 127 ]; then
 		_warning "Could not build the package"
