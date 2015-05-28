@@ -34,17 +34,20 @@ VERSION=
 #executables
 CAT="cat"
 CKSUM="cksum"
+CONFIGURE="configure"
 CP="cp"
 CUT="cut"
 DCH="dch"
 DPKG="dpkg"
 DPKG_BUILDPACKAGE="dpkg-buildpackage -rfakeroot"
+DPKG_SOURCE="dpkg-source"
 FIND="find"
 GIT="git"
 GREP="grep"
 LINTIAN="lintian"
 MAKE="make"
 MKDIR="mkdir -p"
+MV="mv"
 PKGLINT="pkglint"
 PREFIX="/usr/local"
 RM="rm -f"
@@ -235,8 +238,31 @@ _package_debian()
 		return $?
 	fi
 
+	#cleanup
+	$DEBUG $MAKE distclean					|| return 2
+
 	#initialization
 	$DEBUG $MKDIR -- "debian" "debian/source"		|| return 2
+
+	#create the source archive
+	_info "Creating the source archive..."
+	$DEBUG $MAKE dist
+	if [ $? -ne 0 ]; then
+		_error "Could not create the source archive"
+		return 2
+	fi
+	$DEBUG $MV -- "$PACKAGE-$VERSION.tar.gz" \
+		"../${pkgname}_$VERSION.orig.tar.gz"
+	if [ $? -ne 0 ]; then
+		_error "Could not move source archive"
+		return 2
+	fi
+
+	#re-generate the Makefiles
+	if [ -f "$PROJECTCONF" ]; then
+		_info "Re-generating the Makefiles..."
+		$DEBUG $CONFIGURE				|| return 2
+	fi
 
 	#check the license
 	license=
@@ -278,6 +304,16 @@ _package_debian()
 	if [ $? -ne 0 ]; then
 		$DEBUG $RM -r -- "debian"
 		_error "Could not create debian/source/format"
+		return 2
+	fi
+
+	#register the changes if any
+	$DEBUG $DPKG_SOURCE --commit . patch-Makefile
+	res=$?
+	if [ $res -eq 127 ]; then
+		#XXX ignore errors if the command is not installed
+		return 0
+	elif [ $res -ne 0 ]; then
 		return 2
 	fi
 
