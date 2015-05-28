@@ -31,6 +31,7 @@ PROJECTCONF="project.conf"
 VERBOSE=0
 VERSION=
 #executables
+CAT="cat"
 CKSUM="cksum"
 CP="cp"
 CUT="cut"
@@ -292,7 +293,7 @@ _debian_control()
 	[ $DEPEND_xgettext -eq 1 ] && depends="$depends, gettext"
 	[ $DEPEND_pkgconfig -eq 1 ] && depends="$depends, pkg-config"
 
-	cat << EOF
+	$CAT << EOF
 Source: $pkgname
 Section: $section
 Priority: optional
@@ -310,7 +311,7 @@ EOF
 
 	#also generate a development package if necessary
 	[ -n "$major" ] || return 0
-	cat << EOF
+	$CAT << EOF
 
 Package: $pkgname-dev
 Section: libdevel
@@ -323,7 +324,7 @@ EOF
 
 _debian_copyright()
 {
-	cat << EOF
+	$CAT << EOF
 Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
 Name: $pkgname
 Maintainer: $FULLNAME <$EMAIL>
@@ -338,7 +339,7 @@ License: $license
 EOF
 	case "$license" in
 		GPL-3)
-			cat << EOF
+			$CAT << EOF
 
 License: GPL-3
  This program is free software; you can redistribute it and/or modify
@@ -369,11 +370,11 @@ _debian_install()
 	[ -n "$major" ] || return 0
 
 	#FIXME some files may be missed (or absent)
-	cat > "debian/$pkgname$major.install" << EOF
+	$CAT > "debian/$pkgname$major.install" << EOF
 usr/lib/lib*.so.*
 EOF
 
-	cat > "debian/$pkgname-dev.install" << EOF
+	$CAT > "debian/$pkgname-dev.install" << EOF
 usr/include/*
 usr/lib/lib*.a
 usr/lib/lib*.so
@@ -498,7 +499,7 @@ _debian_rules()
 	destdir="\$(PWD)/debian/$pkgname"
 
 	[ -z "${PACKAGE%%lib*}" ] && destdir="\$(PWD)/debian/tmp"
-	cat << EOF
+	$CAT << EOF
 #!/usr/bin/make -f
 
 %:
@@ -609,7 +610,7 @@ _package_pkgsrc()
 _pkgsrc_descr()
 {
 	if [ -f "$PKGSRC_ROOT/wip/$pkgname/DESCR" ]; then
-		cat "$PKGSRC_ROOT/wip/$pkgname/DESCR"
+		$CAT "$PKGSRC_ROOT/wip/$pkgname/DESCR"
 		return $?
 	fi
 	echo "DeforaOS $PACKAGE"
@@ -617,7 +618,7 @@ _pkgsrc_descr()
 
 _pkgsrc_distinfo()
 {
-	cat << EOF
+	$CAT << EOF
 \$NetBSD\$
 
 EOF
@@ -640,16 +641,16 @@ EOF
 
 _pkgsrc_makefile()
 {
-	cat << EOF
+	$CAT << EOF
 # \$NetBSD\$
 
 DISTNAME=	$distname
 EOF
 	[ "$distname" != "$pkgname-$VERSION" ] && echo "PKGNAME=	$pkgname-$VERSION"
-	[ $revision -gt 0 ] && cat << EOF
+	[ $revision -gt 0 ] && $CAT << EOF
 PKGREVISION=	$revision
 EOF
-	cat << EOF
+	$CAT << EOF
 CATEGORIES=	wip
 MASTER_SITES=	$HOMEPAGE/os/download/download/$ID/
 
@@ -659,7 +660,7 @@ COMMENT=	DeforaOS $PACKAGE
 EOF
 
 	#license
-	[ -n "$license" ] && cat << EOF
+	[ -n "$license" ] && $CAT << EOF
 
 LICENSE=	$license
 EOF
@@ -675,13 +676,13 @@ EOF
 
 	#build dependencies
 	#docbook
-	[ $DEPEND_docbookxsl -eq 1 ] && cat << EOF
+	[ $DEPEND_docbookxsl -eq 1 ] && $CAT << EOF
 
 BUILD_DEPENDS+=	libxslt-[0-9]*:../../textproc/libxslt
 BUILD_DEPENDS+=	docbook-xsl-[0-9]*:../../textproc/docbook-xsl
 EOF
 
-	cat << EOF
+	$CAT << EOF
 
 MAKE_FLAGS+=	DESTDIR=\${DESTDIR}
 MAKE_FLAGS+=	PREFIX=\${PREFIX}
@@ -714,7 +715,7 @@ EOF
 	fi
 
 	#options
-	[ -f "$PKGSRC_ROOT/wip/$pkgname/options.mk" ] && cat << EOF
+	[ -f "$PKGSRC_ROOT/wip/$pkgname/options.mk" ] && $CAT << EOF
 
 .include "options.mk"
 EOF
