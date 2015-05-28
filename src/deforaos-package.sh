@@ -21,6 +21,7 @@ DEBUG=
 DEVNULL="/dev/null"
 DOMAIN="defora.org"
 EMAIL=
+FORCE=0
 FULLNAME=
 HOMEPAGE="http://www.$DOMAIN"
 ID="@ID@"
@@ -228,7 +229,7 @@ _package_debian()
 {
 	pkgname=$(echo "$DEBIAN_PREFIX$PACKAGE" | $TR A-Z a-z)
 
-	$DEBUG $RM -r -- "debian"				|| return 2
+	([ $FORCE -eq 0 ] || $DEBUG $RM -r -- "debian")		|| return 2
 
 	#check for changes
 	_info "Checking for changes..."
@@ -274,7 +275,7 @@ _package_debian()
 	[ -n "$license" ] || _warning "Unknown license"
 
 	#debian files
-	for i in $DEBIAN_FILES; do
+	[ $FORCE -eq 0 ] || for i in $DEBIAN_FILES; do
 		_info "Creating debian/$i..."
 		"_debian_$i" > "debian/$i"
 		if [ $? -ne 0 ]; then
@@ -288,7 +289,7 @@ _package_debian()
 	_info "Creating debian/changelog..."
 	_debian_changelog
 	if [ $? -ne 0 ]; then
-		$DEBUG $RM -r -- "debian"
+		 [ $FORCE -eq 0 ] || $DEBUG $RM -r -- "debian"
 		_error "Could not create debian/changelog"
 		return 2
 	fi
@@ -302,7 +303,7 @@ _package_debian()
 	#debian/source/format
 	_debian_source_format > "debian/source/format"
 	if [ $? -ne 0 ]; then
-		$DEBUG $RM -r -- "debian"
+		 [ $FORCE -eq 0 ] || $DEBUG $RM -r -- "debian"
 		_error "Could not create debian/source/format"
 		return 2
 	fi
@@ -334,7 +335,10 @@ _debian_changelog()
 {
 	[ -n "$DEBFULLNAME" ] || DEBFULLNAME="$FULLNAME"
 	[ -n "$DEBEMAIL" ] || DEBEMAIL="$EMAIL"
-	DEBFULLNAME="$DEBFULLNAME" DEBEMAIL="$DEBEMAIL" $DCH --create \
+	create=
+	[ -f "debian/changelog" ] || create="--create"
+
+	DEBFULLNAME="$DEBFULLNAME" DEBEMAIL="$DEBEMAIL" $DEBUG $DCH $create \
 		--distribution "unstable" \
 		--package "$pkgname" --newversion "$VERSION-$revision" \
 		"$DEBIAN_MESSAGE"
@@ -864,8 +868,9 @@ _size()
 #usage
 _usage()
 {
-	echo "Usage: deforaos-package.sh [-Dv][-e e-mail][-i id][-l license][-m method][-n name][-O name=value...] revision" 1>&2
+	echo "Usage: deforaos-package.sh [-Dfv][-e e-mail][-i id][-l license][-m method][-n name][-O name=value...] revision" 1>&2
 	echo "  -D	Run in debugging mode" 1>&2
+	echo "  -f	Reset the packaging information" 1>&2
 	echo "  -v	Verbose mode" 1>&2
 	return 1
 }
@@ -880,13 +885,16 @@ _warning()
 
 #main
 #parse options
-while getopts "De:i:l:m:n:O:v" name; do
+while getopts "De:fi:l:m:n:O:v" name; do
 	case "$name" in
 		D)
 			DEBUG="_debug"
 			;;
 		e)
 			EMAIL="$OPTARG"
+			;;
+		f)
+			FORCE=1
 			;;
 		i)
 			ID="$OPTARG"
