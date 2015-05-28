@@ -100,13 +100,15 @@ _deforaos_release()
 	#run configure again
 	_release_configure
 
-	_info "Checking for differences..."
+	#check for changes
+	_info "Checking for changes..."
 	_release_diff
 	if [ $? -ne 0 ]; then
 		_error "The sources were modified"
 		return $?
 	fi
 
+	#create the archive
 	_info "Creating the archive..."
 	archive="$PACKAGE-$VERSION.tar.gz"
 	target="distcheck"
