@@ -242,6 +242,7 @@ _package_debian()
 	#cleanup
 	$DEBUG $MAKE distclean					|| return 2
 
+
 	#initialization
 	$DEBUG $MKDIR -- "debian" "debian/source"		|| return 2
 
@@ -597,6 +598,9 @@ EOF
 
 override_dh_auto_build:
 	\$(MAKE) PREFIX="/usr"
+
+override_dh_auto_clean:
+	\$(MAKE) distclean
 
 override_dh_auto_install:
 	\$(MAKE) DESTDIR="$destdir" PREFIX="/usr" install
