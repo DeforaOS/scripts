@@ -453,8 +453,12 @@ _debian_install()
 
 	#FIXME some files may be missed (or absent)
 	$CAT > "debian/$pkgname$major.install" << EOF
+usr/bin/*
 usr/lib/lib*.so.$major
 usr/lib/lib*.so.$major.*
+usr/share/doc/*
+usr/share/man/html1/*
+usr/share/man/man1/*
 EOF
 
 	$CAT > "debian/$pkgname-dev.install" << EOF
