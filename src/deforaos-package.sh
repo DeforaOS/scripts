@@ -29,6 +29,7 @@ LANG="C"
 LICENSE=
 METHOD=
 PACKAGE=
+PROGNAME="deforaos-package.sh"
 PROJECTCONF="project.conf"
 VERBOSE=0
 VERSION=
@@ -67,8 +68,9 @@ DEPEND_pkgconfig=0
 DEPEND_xgettext=0
 #method-specific
 DEBIAN_FILES="compat control copyright rules"
-DEBIAN_MESSAGE="Package generated automatically by deforaos-package.sh"
+DEBIAN_MESSAGE="Package generated automatically by $PROGNAME"
 DEBIAN_PREFIX="deforaos-"
+PKGSRC_CATEGORY="wip"
 PKGSRC_PREFIX="deforaos-"
 PKGSRC_ROOT="/usr/pkgsrc"
 
@@ -706,8 +708,8 @@ _package_pkgsrc()
 
 _pkgsrc_descr()
 {
-	if [ -f "$PKGSRC_ROOT/wip/$pkgname/DESCR" ]; then
-		$CAT "$PKGSRC_ROOT/wip/$pkgname/DESCR"
+	if [ -f "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/DESCR" ]; then
+		$CAT "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/DESCR"
 		return $?
 	fi
 	echo "DeforaOS $PACKAGE"
@@ -723,7 +725,7 @@ EOF
 	$RMD160 -- "$PACKAGE-$VERSION.tar.gz"
 	$SIZE -- "$PACKAGE-$VERSION.tar.gz"
 	#additional patches
-	for i in "$PKGSRC_ROOT/wip/$pkgname/patches/patch-"*; do
+	for i in "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/patches/patch-"*; do
 		[ ! -f "$i" ] && continue
 		case "$i" in
 			*.orig)
@@ -731,8 +733,8 @@ EOF
 				;;
 		esac
 		i="${i##*/}"
-		(cd "$PKGSRC_ROOT/wip/$pkgname/patches" && $SHA1 -- "$i") ||
-			return 2
+		(cd "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/patches" \
+			&& $SHA1 -- "$i")			|| return 2
 	done
 }
 
@@ -743,12 +745,13 @@ _pkgsrc_makefile()
 
 DISTNAME=	$distname
 EOF
-	[ "$distname" != "$pkgname-$VERSION" ] && echo "PKGNAME=	$pkgname-$VERSION"
+	[ "$distname" != "$pkgname-$VERSION" ] \
+		&& echo "PKGNAME=	$pkgname-$VERSION"
 	[ $revision -gt 0 ] && $CAT << EOF
 PKGREVISION=	$revision
 EOF
 	$CAT << EOF
-CATEGORIES=	wip
+CATEGORIES=	$PKGSRC_CATEGORY
 MASTER_SITES=	$HOMEPAGE/os/download/download/$ID/
 
 MAINTAINER=	$EMAIL
@@ -787,7 +790,7 @@ EOF
 
 	#rc.d scripts
 	rcd=
-	for i in "$PKGSRC_ROOT/wip/$pkgname/files/"*.sh; do
+	for i in "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/files/"*.sh; do
 		[ ! -f "$i" ] && continue
 		i="${i##*/}"
 		rcd="$rcd ${i%.sh}"
@@ -812,7 +815,8 @@ EOF
 	fi
 
 	#options
-	[ -f "$PKGSRC_ROOT/wip/$pkgname/options.mk" ] && $CAT << EOF
+	[ -f "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/options.mk" ] \
+		&& $CAT << EOF
 
 .include "options.mk"
 EOF
@@ -831,8 +835,10 @@ _pkgsrc_message()
 	[ $# -eq 1 ]						|| return 1
 	pkgname="$1"
 
-	[ ! -f "$PKGSRC_ROOT/wip/$pkgname/MESSAGE" ]		&& return 0
-	$DEBUG $CP -- "$PKGSRC_ROOT/wip/$pkgname/MESSAGE" "$pkgname/MESSAGE"
+	[ ! -f "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/MESSAGE" ] \
+		&& return 0
+	$DEBUG $CP -- "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/MESSAGE" \
+		"$pkgname/MESSAGE"
 }
 
 
@@ -847,7 +853,7 @@ _debug()
 #error
 _error()
 {
-	echo "deforaos-package.sh: error: $@" 1>&2
+	echo "$PROGNAME: error: $@" 1>&2
 	return 2
 }
 
@@ -855,7 +861,7 @@ _error()
 #info
 _info()
 {
-	[ "$VERBOSE" -ne 0 ] && echo "deforaos-package.sh: $@" 1>&2
+	[ "$VERBOSE" -ne 0 ] && echo "$PROGNAME: $@" 1>&2
 	return 0
 }
 
@@ -880,7 +886,7 @@ _size()
 #usage
 _usage()
 {
-	echo "Usage: deforaos-package.sh [-Dfv][-e e-mail][-i id][-l license][-m method][-n name][-O name=value...] revision" 1>&2
+	echo "Usage: $PROGNAME [-Dfv][-e e-mail][-i id][-l license][-m method][-n name][-O name=value...] revision" 1>&2
 	echo "  -D	Run in debugging mode" 1>&2
 	echo "  -f	Reset the packaging information" 1>&2
 	echo "  -v	Verbose mode" 1>&2
@@ -891,7 +897,7 @@ _usage()
 #warning
 _warning()
 {
-	echo "deforaos-package.sh: warning: $@" 1>&2
+	echo "$PROGNAME: warning: $@" 1>&2
 }
 
 
