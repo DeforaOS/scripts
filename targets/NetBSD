@@ -65,9 +65,10 @@ _image_image_boot()
 	#/boot.cfg
 	BOOT_SPLASH="vesa 800x600x16;boot /netbsd"
 	if [ -n "$IMAGE_SPLASH" ]; then
+		filename="${IMAGE_SPLASH##*/}"
 		$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_SPLASH" \
-			"$DESTDIR/netbsd.jpeg"			|| return 2
-		BOOT_SPLASH="vesa 800x600x16;splash /netbsd.jpeg;boot /netbsd -z"
+			"$DESTDIR/$filename"			|| return 2
+		BOOT_SPLASH="vesa 800x600x16;splash /$filename;boot /netbsd -z"
 	fi
 	$SUDO sh -c "cat > $DESTDIR/boot.cfg" << EOF
 clear=1
@@ -216,9 +217,10 @@ _image_iso_post()
 								|| return 2
 	BOOT_SPLASH="vesa 800x600x16;boot /netbsd.gz"
 	if [ -n "$IMAGE_SPLASH" ]; then
+		filename="${IMAGE_SPLASH##*/}"
 		$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_SPLASH" \
-			"$DESTDIR/netbsd.jpeg"			|| return 2
-		BOOT_SPLASH="vesa 800x600x16;splash /netbsd.jpeg;boot /netbsd.gz -z"
+			"$DESTDIR/$filename"			|| return 2
+		BOOT_SPLASH="vesa 800x600x16;splash /$filename;boot /netbsd.gz -z"
 	fi
 	$SUDO sh -c "cat > $DESTDIR/boot.cfg" << EOF
 clear=1
