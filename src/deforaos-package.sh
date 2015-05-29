@@ -632,7 +632,7 @@ _package_pkgsrc()
 	distname="$PACKAGE-$VERSION"
 	pkgname=$(echo "$PKGSRC_PREFIX$PACKAGE" | $TR A-Z a-z)
 
-	$DEBUG $RM -r -- "pkgname"				|| return 2
+	$DEBUG $RM -r -- "$pkgname"				|| return 2
 	$DEBUG $MKDIR -- "$pkgname"				|| return 2
 
 	#check the license
