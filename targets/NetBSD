@@ -59,16 +59,19 @@ _image_image_pre()
 
 _image_image_boot()
 {
+	ext=
+	[ "${IMAGE_KERNEL%%.gz}" = "$IMAGE_KERNEL" ] || ext=".gz"
+
 	#/boot
 	$DEBUG $SUDO $INSTALL -m 0444 "$IMAGE_BOOT" "$DESTDIR/boot" \
 								|| return 2
 	#/boot.cfg
-	BOOT_SPLASH="vesa 800x600x16;boot /netbsd"
+	BOOT_SPLASH="vesa 800x600x16;boot /netbsd$ext"
 	if [ -n "$IMAGE_SPLASH" ]; then
 		filename="${IMAGE_SPLASH##*/}"
 		$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_SPLASH" \
 			"$DESTDIR/$filename"			|| return 2
-		BOOT_SPLASH="vesa 800x600x16;splash /$filename;boot /netbsd -z"
+		BOOT_SPLASH="vesa 800x600x16;splash /$filename;boot /netbsd$ext -z"
 	fi
 	$SUDO sh -c "cat > $DESTDIR/boot.cfg" << EOF
 clear=1
@@ -77,7 +80,7 @@ banner====================
 banner=
 banner=Please choose an option from the following menu:
 menu=Boot DeforaOS:$BOOT_SPLASH
-menu=Boot DeforaOS (text mode):boot /netbsd
+menu=Boot DeforaOS (text mode):boot /netbsd$ext
 menu=Reboot:quit
 menu=Drop to boot prompt:prompt
 default=1
@@ -87,7 +90,7 @@ EOF
 	if [ -n "$IMAGE_KERNEL" ]; then
 		#/netbsd
 		$DEBUG $SUDO $INSTALL -m 0755 "$IMAGE_KERNEL" \
-			"$DESTDIR/netbsd"			|| return 2
+			"$DESTDIR/netbsd$ext"			|| return 2
 		$DEBUG $SUDO $INSTALLBOOT -m "$MACHINE" -o "timeout=10" \
 			"/dev/r${VND}e" "/usr/mdec/bootxx_ffsv1"|| return 2
 	fi
@@ -204,6 +207,8 @@ _image_iso_pre()
 
 _image_iso_post()
 {
+	ext=".gz"
+
 	_image_image_configure					|| return 2
 	#FIXME assumes the kernel is uncompressed
 	$DEBUG $SUDO $INSTALL -m 0755 "$IMAGE_KERNEL" "$DESTDIR/netbsd" \
@@ -215,12 +220,12 @@ _image_iso_post()
 	$DEBUG $SUDO $GZIP -9 "$DESTDIR/netbsd"			|| return 2
 	$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_BOOT" "$DESTDIR/boot" \
 								|| return 2
-	BOOT_SPLASH="vesa 800x600x16;boot /netbsd.gz"
+	BOOT_SPLASH="vesa 800x600x16;boot /netbsd$ext"
 	if [ -n "$IMAGE_SPLASH" ]; then
 		filename="${IMAGE_SPLASH##*/}"
 		$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_SPLASH" \
 			"$DESTDIR/$filename"			|| return 2
-		BOOT_SPLASH="vesa 800x600x16;splash /$filename;boot /netbsd.gz -z"
+		BOOT_SPLASH="vesa 800x600x16;splash /$filename;boot /netbsd$ext -z"
 	fi
 	$SUDO sh -c "cat > $DESTDIR/boot.cfg" << EOF
 clear=1
@@ -229,7 +234,7 @@ banner====================
 banner=
 banner=Please choose an option from the following menu:
 menu=Boot DeforaOS:$BOOT_SPLASH
-menu=Boot DeforaOS (text mode):boot /netbsd.gz
+menu=Boot DeforaOS (text mode):boot /netbsd$ext
 menu=Reboot:quit
 menu=Drop to boot prompt:prompt
 default=1
