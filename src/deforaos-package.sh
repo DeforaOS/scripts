@@ -31,6 +31,7 @@ METHOD=
 PACKAGE=
 PROGNAME="deforaos-package.sh"
 PROJECTCONF="project.conf"
+VENDOR="DeforaOS"
 VERBOSE=0
 VERSION=
 #executables
@@ -105,7 +106,7 @@ _deforaos_package()
 			;;
 	esac
 
-	_info "DeforaOS $PACKAGE $VERSION-$revision packaged"
+	_info "$VENDOR $PACKAGE $VERSION-$revision packaged"
 }
 
 _package_diff()
@@ -392,8 +393,8 @@ Homepage: $HOMEPAGE/os/project/$ID/$PACKAGE
 Package: $pkgname$major
 Architecture: any
 Depends: \${shlibs:Depends}, \${misc:Depends}
-Description: DeforaOS $PACKAGE
- DeforaOS $PACKAGE
+Description: $VENDOR $PACKAGE
+ $VENDOR $PACKAGE
 EOF
 
 	#also generate a development package if necessary
@@ -404,8 +405,8 @@ Package: $pkgname-dev
 Section: libdevel
 Architecture: any
 Depends: $pkgname$major (= \${binary:Version})
-Description: DeforaOS $PACKAGE (development files)
- DeforaOS $PACKAGE (development files)
+Description: $VENDOR $PACKAGE (development files)
+ $VENDOR $PACKAGE (development files)
 EOF
 }
 
@@ -712,7 +713,7 @@ _pkgsrc_descr()
 		$CAT "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/DESCR"
 		return $?
 	fi
-	echo "DeforaOS $PACKAGE"
+	echo "$VENDOR $PACKAGE"
 }
 
 _pkgsrc_distinfo()
@@ -756,7 +757,7 @@ MASTER_SITES=	$HOMEPAGE/os/download/download/$ID/
 
 MAINTAINER=	$EMAIL
 HOMEPAGE=	$HOMEPAGE/
-COMMENT=	DeforaOS $PACKAGE
+COMMENT=	$VENDOR $PACKAGE
 EOF
 
 	#license
