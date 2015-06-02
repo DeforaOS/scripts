@@ -278,18 +278,12 @@ _package_debian()
 	pkgname=$(echo "$DEBIAN_PREFIX$PACKAGE" | $TR A-Z a-z)
 	[ -n "$PREFIX" ] || PREFIX="/usr"
 
-	([ $FORCE -eq 0 ] || $DEBUG $RM -r -- ".pc" "debian")	|| return 2
-
 	#check for changes
 	_info "Checking for changes..."
 	_package_diff						|| return 2
 
 	#cleanup
 	$DEBUG $MAKE distclean					|| return 2
-
-
-	#initialization
-	$DEBUG $MKDIR -- "debian" "debian/source"		|| return 2
 
 	#create the source archive
 	_info "Creating the source archive..."
@@ -319,11 +313,15 @@ _package_debian()
 	[ -n "$license" ] || _warning "Unknown license"
 
 	#debian files
-	[ $FORCE -eq 0 ] || for i in $DEBIAN_FILES; do
+	if [ $FORCE -ne 0 ]; then
+		$DEBUG $RM -- ".pc"				|| return 2
+		$DEBUG $RM -r -- "debian"			|| return 2
+	fi
+	[ -d "debian" ] || for i in $DEBIAN_FILES; do
 		_info "Creating debian/$i..."
+		$DEBUG $MKDIR -- "debian"			|| return 2
 		"_debian_$i" > "debian/$i"
 		if [ $? -ne 0 ]; then
-			$DEBUG $RM -r -- "debian"
 			_error "Could not create debian/$i"
 			return 2
 		fi
@@ -333,7 +331,6 @@ _package_debian()
 	_info "Creating debian/changelog..."
 	_debian_changelog
 	if [ $? -ne 0 ]; then
-		 [ $FORCE -eq 0 ] || $DEBUG $RM -r -- "debian"
 		_error "Could not create debian/changelog"
 		return 2
 	fi
@@ -345,6 +342,7 @@ _package_debian()
 	_debian_menu
 
 	#debian/source/format
+	$DEBUG $MKDIR -- "debian/source"			|| return 2
 	_debian_source_format > "debian/source/format"
 	if [ $? -ne 0 ]; then
 		 [ $FORCE -eq 0 ] || $DEBUG $RM -r -- "debian"
@@ -497,7 +495,8 @@ _debian_install()
 	[ -n "$major" ] || return 0
 
 	#FIXME some files may be missed (or absent)
-	$CAT > "debian/$pkgname$major.install" << EOF
+	if [ $FORCE -ne 0 -o ! -f "debian/$pkgname${major}.install" ]; then
+		$CAT > "debian/$pkgname${major}.install" << EOF
 usr/bin/*
 usr/lib/lib*.so.$major
 usr/lib/lib*.so.$major.*
@@ -505,14 +504,17 @@ usr/share/doc/*
 usr/share/man/html1/*
 usr/share/man/man1/*
 EOF
+	fi
 
-	$CAT > "debian/$pkgname-dev.install" << EOF
+	if [ $FORCE -ne 0 -o ! -f "debian/$pkgname-dev.install" ]; then
+		$CAT > "debian/$pkgname-dev.install" << EOF
 usr/include/*
 usr/lib/lib*.a
 usr/lib/lib*.so
 usr/lib/pkgconfig/*.pc
 usr/share/gtk-doc/html/*
 EOF
+	fi
 }
 
 _debian_lintian()
@@ -550,6 +552,7 @@ _debian_menu()
 	[ -z "$menus" ] && return 0
 
 	#debian/menu
+	[ $FORCE -eq 0 -a -f "debian/menu" ]			&& return 0
 	_info "Creating debian/menu..."
 	$TOUCH "debian/menu"					|| return 2
 	for i in $menus; do
