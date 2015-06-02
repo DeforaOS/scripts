@@ -234,23 +234,20 @@ _package_guess_method()
 
 _package_guess_name()
 {
-	PACKAGE=
-	VERSION=
-
 	while read line; do
 		case "$line" in
 			"package="*)
-				PACKAGE="${line#package=}"
+				[ -n "$PACKAGE" ] || PACKAGE="${line#package=}"
 				;;
 			"version="*)
-				VERSION="${line#version=}"
+				[ -n "$VERSION" ] || VERSION="${line#version=}"
 				;;
 			"["*)
 				break
 				;;
 		esac
 	done < "$PROJECTCONF"
-	[ -z "$PACKAGE" -o -z "$VERSION" ]			&& return 2
+	[ -n "$PACKAGE" -a -n "$VERSION" ]			|| return 2
 	return 0
 }
 
