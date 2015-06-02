@@ -88,7 +88,6 @@ timeout=10
 EOF
 	[ $? -eq 0 ]						|| return 2
 	if [ -n "$IMAGE_KERNEL" ]; then
-		#/netbsd
 		$DEBUG $SUDO $INSTALL -m 0755 "$IMAGE_KERNEL" \
 			"$DESTDIR/netbsd$ext"			|| return 2
 		$DEBUG $SUDO $INSTALLBOOT -m "$MACHINE" -o "timeout=10" \
@@ -207,17 +206,23 @@ _image_iso_pre()
 
 _image_iso_post()
 {
-	ext=".gz"
+	ext=
+	[ "${IMAGE_KERNEL%%.gz}" = "$IMAGE_KERNEL" ] || ext=".gz"
 
 	_image_image_configure					|| return 2
-	#FIXME assumes the kernel is uncompressed
-	$DEBUG $SUDO $INSTALL -m 0755 "$IMAGE_KERNEL" "$DESTDIR/netbsd" \
+	$DEBUG $SUDO $INSTALL -m 0755 "$IMAGE_KERNEL" "$DESTDIR/netbsd$ext" \
 								|| return 2
 	if [ -n "$IMAGE_RAMDISK" ]; then
+		#uncompress the kernel if necessary
+		if [ -n "$ext" ]; then
+			$DEBUG $SUDO $GZIP -u "$DESTDIR/netbsd$ext" \
+								|| return 2
+		fi
 		$DEBUG $SUDO $MDSETIMAGE "$DESTDIR/netbsd" "$IMAGE_RAMDISK" \
 								|| return 2
+		$DEBUG $SUDO $GZIP -9 "$DESTDIR/netbsd"		|| return 2
+		ext=".gz"
 	fi
-	$DEBUG $SUDO $GZIP -9 "$DESTDIR/netbsd"			|| return 2
 	$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_BOOT" "$DESTDIR/boot" \
 								|| return 2
 	BOOT_SPLASH="vesa 800x600x16;boot /netbsd$ext"
