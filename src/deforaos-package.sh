@@ -320,7 +320,7 @@ _package_debian()
 	[ -d "debian" ] || for i in $DEBIAN_FILES; do
 		_info "Creating debian/$i..."
 		$DEBUG $MKDIR -- "debian"			|| return 2
-		"_debian_$i" > "debian/$i"
+		"_debian_file_$i" > "debian/$i"
 		if [ $? -ne 0 ]; then
 			_error "Could not create debian/$i"
 			return 2
@@ -329,21 +329,21 @@ _package_debian()
 
 	#debian/changelog
 	_info "Creating debian/changelog..."
-	_debian_changelog
+	_debian_file_changelog
 	if [ $? -ne 0 ]; then
 		_error "Could not create debian/changelog"
 		return 2
 	fi
 
 	#debian/install
-	_debian_install
+	_debian_file_install					|| return 2
 
 	#debian/menu
-	_debian_menu
+	_debian_file_menu					|| return 2
 
 	#debian/source/format
 	$DEBUG $MKDIR -- "debian/source"			|| return 2
-	_debian_source_format > "debian/source/format"
+	_debian_file_source_format > "debian/source/format"
 	if [ $? -ne 0 ]; then
 		 [ $FORCE -eq 0 ] || $DEBUG $RM -r -- "debian"
 		_error "Could not create debian/source/format"
@@ -374,7 +374,7 @@ _package_debian()
 	_debian_lintian
 }
 
-_debian_changelog()
+_debian_file_changelog()
 {
 	[ -n "$DEBFULLNAME" ] || DEBFULLNAME="$FULLNAME"
 	[ -n "$DEBEMAIL" ] || DEBEMAIL="$EMAIL"
@@ -396,12 +396,12 @@ _debian_changelog()
 	return $ret
 }
 
-_debian_compat()
+_debian_file_compat()
 {
 	echo "9"
 }
 
-_debian_control()
+_debian_file_control()
 {
 	section="unknown"
 
@@ -447,7 +447,7 @@ Description: $VENDOR $PACKAGE (development files)
 EOF
 }
 
-_debian_copyright()
+_debian_file_copyright()
 {
 	$CAT << EOF
 Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
@@ -487,7 +487,7 @@ EOF
 	esac
 }
 
-_debian_install()
+_debian_file_install()
 {
 	major=
 	[ -z "${PACKAGE%%lib*}" ] && major=0
@@ -517,29 +517,7 @@ EOF
 	fi
 }
 
-_debian_lintian()
-{
-	arch="$($DPKG --print-architecture)"
-	major=
-	[ -z "${PACKAGE%%lib*}" ] && major=0
-
-	_info "Checking the package..."
-	#XXX only check for the packages built this time
-	for i in "../${pkgname}_$VERSION-${revision}_$arch.deb" \
-		"../$pkgname${major}_$VERSION-${revision}_$arch.deb" \
-		"../$pkgname-dev_$VERSION-${revision}_$arch.deb"; do
-		[ -f "$i" ] || continue
-
-		$DEBUG $LINTIAN "$i"
-		#XXX ignore errors if the command is not installed
-		if [ $? -eq 127 ]; then
-			_warning "Could not check the package"
-			return 0
-		fi
-	done
-}
-
-_debian_menu()
+_debian_file_menu()
 {
 	#obtain the menu entries
 	menus=
@@ -630,7 +608,7 @@ _debian_menu()
 	done >> "debian/menu"
 }
 
-_debian_rules()
+_debian_file_rules()
 {
 	destdir="\$(PWD)/debian/$pkgname"
 
@@ -654,9 +632,31 @@ override_dh_auto_install:
 EOF
 }
 
-_debian_source_format()
+_debian_file_source_format()
 {
 	echo "3.0 (quilt)"
+}
+
+_debian_lintian()
+{
+	arch="$($DPKG --print-architecture)"
+	major=
+	[ -z "${PACKAGE%%lib*}" ] && major=0
+
+	_info "Checking the package..."
+	#XXX only check for the packages built this time
+	for i in "../${pkgname}_$VERSION-${revision}_$arch.deb" \
+		"../$pkgname${major}_$VERSION-${revision}_$arch.deb" \
+		"../$pkgname-dev_$VERSION-${revision}_$arch.deb"; do
+		[ -f "$i" ] || continue
+
+		$DEBUG $LINTIAN "$i"
+		#XXX ignore errors if the command is not installed
+		if [ $? -eq 127 ]; then
+			_warning "Could not check the package"
+			return 0
+		fi
+	done
 }
 
 
