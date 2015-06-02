@@ -70,9 +70,9 @@ DEPEND_xgettext=0
 #method-specific
 DEBIAN_FILES="compat control copyright rules"
 DEBIAN_MESSAGE="Package generated automatically by $PROGNAME"
-DEBIAN_PREFIX="deforaos-"
+DEBIAN_PREFIX=
 PKGSRC_CATEGORY="wip"
-PKGSRC_PREFIX="deforaos-"
+PKGSRC_PREFIX=
 PKGSRC_ROOT="/usr/pkgsrc"
 
 
@@ -273,6 +273,8 @@ _package_guess_scm()
 #package_debian
 _package_debian()
 {
+	[ -n "$DEBIAN_PREFIX" -o -z "$VENDOR" ] \
+		|| DEBIAN_PREFIX=$(echo "$VENDOR-" | $TR A-Z a-z)
 	pkgname=$(echo "$DEBIAN_PREFIX$PACKAGE" | $TR A-Z a-z)
 	[ -n "$PREFIX" ] || PREFIX="/usr"
 
@@ -660,6 +662,8 @@ _package_pkgsrc()
 {
 	revision="$1"
 	[ -n "$PREFIX" ] || PREFIX="/usr/pkg"
+	[ -n "$PKGSRC_PREFIX" -o -z "$VENDOR" ] \
+		|| PKGSRC_PREFIX=$(echo "$VENDOR-" | $TR A-Z a-z)
 
 	#create the source archive
 	_info "Creating the source archive..."
