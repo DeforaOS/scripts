@@ -111,15 +111,21 @@ _deforaos_package()
 
 _package_diff()
 {
-	if [ -d "CVS" ]; then
-		_package_diff_cvs
-		return $?
-	elif [ -d ".git" ]; then
-		_package_diff_git
-		return $?
-	else
-		return 2
-	fi
+	scm=$(_package_guess_scm)
+
+	case "$scm" in
+		cvs|git)
+			"_package_diff_$scm"
+			if [ $? -ne 0 ]; then
+				_error "The sources were modified"
+				return $?
+			fi
+			;;
+		*)
+			_warning "Could not check for source changes"
+			;;
+	esac
+	return 0
 }
 
 _package_diff_cvs()
@@ -163,13 +169,25 @@ _package_guess_dependencies()
 
 _package_guess_email()
 {
-	[ -d ".git" ] && EMAIL=$($GIT config user.email)
+	scm=$(_package_guess_scm)
+
+	case "$scm" in
+		git)
+			EMAIL=$($GIT config user.email)
+			;;
+	esac
 	[ -n "$EMAIL" ] || EMAIL="$USER@$DOMAIN"
 }
 
 _package_guess_fullname()
 {
-	[ -d ".git" ] && FULLNAME=$($GIT config user.name)
+	scm=$(_package_guess_scm)
+
+	case "$scm" in
+		git)
+			FULLNAME=$($GIT config user.name)
+			;;
+	esac
 	[ -n "$FULLNAME" ] || FULLNAME="$USER"
 }
 
@@ -227,6 +245,24 @@ _package_guess_name()
 }
 
 
+#package_guess_scm
+_package_guess_scm()
+{
+	#cvs
+	if [ -d "CVS" ]; then
+		echo "cvs"
+		return 0
+	fi
+	#git
+	#FIXME also look in parent folders
+	if [ -d ".git" ]; then
+		echo "git"
+		return 0
+	fi
+	return 2
+}
+
+
 #package_debian
 _package_debian()
 {
@@ -237,11 +273,7 @@ _package_debian()
 
 	#check for changes
 	_info "Checking for changes..."
-	_package_diff
-	if [ $? -ne 0 ]; then
-		_error "The sources were modified"
-		return $?
-	fi
+	_package_diff						|| return 2
 
 	#cleanup
 	$DEBUG $MAKE distclean					|| return 2
