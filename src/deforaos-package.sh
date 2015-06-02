@@ -140,6 +140,16 @@ _package_diff_git()
 	$DEBUG $GIT diff --quiet
 }
 
+_package_dist()
+{
+	$DEBUG $MAKE PACKAGE="$PACKAGE" dist
+	if [ $? -ne 0 ]; then
+		_error "Could not create the source archive"
+		return 2
+	fi
+	return 0
+}
+
 _package_guess_dependencies()
 {
 	#desktop database
@@ -284,16 +294,14 @@ _package_debian()
 
 	#create the source archive
 	_info "Creating the source archive..."
-	$DEBUG $MAKE dist
-	if [ $? -ne 0 ]; then
-		_error "Could not create the source archive"
-		return 2
-	fi
-	$DEBUG $MV -- "$PACKAGE-$VERSION.tar.gz" \
-		"../${pkgname}_$VERSION.orig.tar.gz"
-	if [ $? -ne 0 ]; then
-		_error "Could not move source archive"
-		return 2
+	if [ ! -f "../${pkgname}_${VERSION}.orig.tar.gz" ]; then
+		_package_dist					|| return 2
+		$DEBUG $MV -- "$PACKAGE-${VERSION}.tar.gz" \
+			"../${pkgname}_${VERSION}.orig.tar.gz"
+		if [ $? -ne 0 ]; then
+			_error "Could not move source archive"
+			return 2
+		fi
 	fi
 
 	#re-generate the Makefiles
@@ -656,12 +664,10 @@ _package_pkgsrc()
 	revision="$1"
 	[ -n "$PREFIX" ] || PREFIX="/usr/pkg"
 
-	#the archive is needed
-	_info "Checking the source archive..."
-	if [ ! -f "$PACKAGE-$VERSION.tar.gz" ]; then
-		_error "The source archive could not be found"
-		_error "Have you ran deforaos-release.sh first?"
-		return 2
+	#create the source archive
+	_info "Creating the source archive..."
+	if [ ! -f "$PACKAGE-${VERSION}.tar.gz" ]; then
+		_package_dist					|| return 2
 	fi
 
 	distname="$PACKAGE-$VERSION"
