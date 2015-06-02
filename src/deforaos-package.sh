@@ -757,9 +757,9 @@ _pkgsrc_distinfo()
 \$NetBSD\$
 
 EOF
-	$SHA1 -- "$PACKAGE-$VERSION.tar.gz"
-	$RMD160 -- "$PACKAGE-$VERSION.tar.gz"
-	$SIZE -- "$PACKAGE-$VERSION.tar.gz"
+	$SHA1 -- "$PACKAGE-${VERSION}.tar.gz"
+	$RMD160 -- "$PACKAGE-${VERSION}.tar.gz"
+	$SIZE -- "$PACKAGE-${VERSION}.tar.gz"
 	#additional patches
 	for i in "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/patches/patch-"*; do
 		[ ! -f "$i" ] && continue
