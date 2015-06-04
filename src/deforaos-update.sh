@@ -192,4 +192,4 @@ if [ $email -eq 1 ]; then
 else
 	$update
 fi
-[ $delete -eq 1 ] && $RMDIR "$ROOT"
+[ $delete -eq 1 ] && $RMDIR -- "$ROOT"
