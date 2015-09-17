@@ -180,7 +180,7 @@ _link_branch()
 	repository="$1"
 	branch="$2"
 
-	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=shortlog;hb=$branch"
+	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=shortlog;h=refs/heads/$branch"
 	[ -n "$REDMINE" ] && echo "$REDMINE/repository/${repository}/show?rev=$branch" | _tolower
 }
 
