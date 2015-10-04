@@ -21,7 +21,6 @@ DEBUG=
 DEVNULL="/dev/null"
 DRYRUN=0
 FORCE=0
-FREECODE="https://freecode.com/users/$USERNAME"
 GIT_BRANCH="master"
 HOMEPAGE="https://www.defora.org"
 PACKAGE=
@@ -134,7 +133,6 @@ _deforaos_release()
 	_info "The following steps are:"
 	_info " * upload to $HOMEPAGE/os/project/submit/@ID@/$PACKAGE?type=release"
 	_info " * publish a news on $HOMEPAGE/os/news/submit"
-	_info " * post on $FREECODE"
 	_info " * tweet (possibly via freecode)"
 	_info " * package where appropriate (see deforaos-package.sh)"
 }
