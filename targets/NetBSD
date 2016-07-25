@@ -60,18 +60,22 @@ _image_image_pre()
 _image_image_boot()
 {
 	ext=
+	resolution="800x600"
+	depth="16"
+	timeout="10"
+	bootxx="bootxx_ffsv1"
 	[ "${IMAGE_KERNEL%%.gz}" = "$IMAGE_KERNEL" ] || ext=".gz"
 
 	#/boot
 	$DEBUG $SUDO $INSTALL -m 0444 "$IMAGE_BOOT" "$DESTDIR/boot" \
 								|| return 2
 	#/boot.cfg
-	BOOT_SPLASH="vesa 800x600x16;boot /netbsd$ext"
+	BOOT_SPLASH="vesa ${resolution}x$depth;boot /netbsd$ext"
 	if [ -n "$IMAGE_SPLASH" ]; then
 		filename="${IMAGE_SPLASH##*/}"
 		$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_SPLASH" \
 			"$DESTDIR/$filename"			|| return 2
-		BOOT_SPLASH="vesa 800x600x16;splash /$filename;boot /netbsd$ext -z"
+		BOOT_SPLASH="vesa ${resolution}x$depth;splash /$filename;boot /netbsd$ext -z"
 	fi
 	$SUDO sh -c "cat > $DESTDIR/boot.cfg" << EOF
 clear=1
@@ -84,14 +88,14 @@ menu=Boot DeforaOS (text mode):boot /netbsd$ext
 menu=Reboot:quit
 menu=Drop to boot prompt:prompt
 default=1
-timeout=10
+timeout=$timeout
 EOF
 	[ $? -eq 0 ]						|| return 2
 	if [ -n "$IMAGE_KERNEL" ]; then
 		$DEBUG $SUDO $INSTALL -m 0755 "$IMAGE_KERNEL" \
 			"$DESTDIR/netbsd$ext"			|| return 2
 		$DEBUG $SUDO $INSTALLBOOT -m "$MACHINE" -o "timeout=10" \
-			"/dev/r${VND}e" "/usr/mdec/bootxx_ffsv1"|| return 2
+			"/dev/r${VND}e" "/usr/mdec/$bootxx"	|| return 2
 	fi
 }
 
@@ -207,6 +211,10 @@ _image_iso_pre()
 _image_iso_post()
 {
 	ext=
+	resolution="800x600"
+	depth="16"
+	timeout="10"
+	bootxx="bootxx_cd9660"
 	[ "${IMAGE_KERNEL%%.gz}" = "$IMAGE_KERNEL" ] || ext=".gz"
 
 	_image_image_configure					|| return 2
@@ -225,12 +233,12 @@ _image_iso_post()
 	fi
 	$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_BOOT" "$DESTDIR/boot" \
 								|| return 2
-	BOOT_SPLASH="vesa 800x600x16;boot /netbsd$ext"
+	BOOT_SPLASH="vesa ${resolution}x$depth;boot /netbsd$ext"
 	if [ -n "$IMAGE_SPLASH" ]; then
 		filename="${IMAGE_SPLASH##*/}"
 		$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_SPLASH" \
 			"$DESTDIR/$filename"			|| return 2
-		BOOT_SPLASH="vesa 800x600x16;splash /$filename;boot /netbsd$ext -z"
+		BOOT_SPLASH="vesa ${resolution}x$depth;splash /$filename;boot /netbsd$ext -z"
 	fi
 	$SUDO sh -c "cat > $DESTDIR/boot.cfg" << EOF
 clear=1
@@ -243,10 +251,9 @@ menu=Boot DeforaOS (text mode):boot /netbsd$ext
 menu=Reboot:quit
 menu=Drop to boot prompt:prompt
 default=1
-timeout=10
+timeout=$timeout
 EOF
-	$DEBUG $INSTALL -m 0644 "/usr/mdec/bootxx_cd9660" "bootxx" \
-								|| return 2
+	$DEBUG $INSTALL -m 0644 "/usr/mdec/$bootxx" "bootxx"	|| return 2
 	$DEBUG $INSTALLBOOT -m "$MACHINE" -o "$BOOTOPTIONS" -e bootxx \
 								|| return 2
 	$DEBUG $MKISOFS $MKISOFS_ARGS "$IMAGE_FILE" "$DESTDIR"	|| return 2
