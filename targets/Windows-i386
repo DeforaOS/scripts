@@ -5,3 +5,5 @@
 
 #variables
 [ -z "$BOOTSTRAP_LDFLAGS"] && BOOTSTRAP_LDFLAGS="-lws2_32"
+[ -z "$EXEEXT" ] && EXEEXT=".exe"
+[ -z "$SOEXT" ] && SOEXT=".dll"
