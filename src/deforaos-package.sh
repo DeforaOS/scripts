@@ -94,7 +94,7 @@ _deforaos_package()
 	[ -n "$LICENSE" ] || _package_guess_license
 	_package_guess_dependencies
 	[ -n "$EMAIL" ] || EMAIL=$(_package_guess_email)
-	[ -n "$FULLNAME" ] || _package_guess_fullname
+	[ -n "$FULLNAME" ] || FULLNAME=$(_package_guess_fullname)
 
 	#call the proper packaging function
 	if [ -z "$METHOD" ]; then
@@ -205,10 +205,15 @@ _package_guess_fullname()
 
 	case "$scm" in
 		git)
-			FULLNAME=$($GIT config user.name)
+			$GIT config user.name			|| return 2
+			return 0
 			;;
 	esac
-	[ -n "$FULLNAME" ] || FULLNAME="$USER"
+	if [ -n "$FULLNAME" ]; then
+		echo "$FULLNAME"
+	else
+		echo "$USER"
+	fi
 }
 
 _package_guess_license()
