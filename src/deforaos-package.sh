@@ -87,7 +87,7 @@ _deforaos_package()
 		_error "Could not determine the package name or version"
 		return $?
 	fi
-	[ -n "$METHOD" ] || _package_guess_method
+	[ -n "$METHOD" ] || METHOD=$(_package_guess_method)
 	[ -n "$LICENSE" ] || _package_guess_license
 	_package_guess_dependencies
 	[ -n "$EMAIL" ] || _package_guess_email
@@ -217,19 +217,17 @@ _package_guess_license()
 
 _package_guess_method()
 {
-	#guess the packaging method
-	METHOD=
-
-	#debian
-	[ -f "/etc/debian_version" ] && METHOD="debian"
-
-	#pkgsrc
-	[ -d "/usr/pkg" ] && METHOD="pkgsrc"
-
-	if [ -z "$METHOD" ]; then
+	if [ -f "/etc/debian_version" ]; then
+		#debian
+		echo "debian"
+	elif [ -d "/usr/pkg" ]; then
+		#pkgsrc
+		echo "pkgsrc"
+	else
 		_error "Unsupported platform"
 		return $?
 	fi
+	return 0
 }
 
 _package_guess_name()
