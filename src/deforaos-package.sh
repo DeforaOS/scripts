@@ -93,7 +93,7 @@ _deforaos_package()
 	[ -n "$METHOD" ] || METHOD=$(_package_guess_method)
 	[ -n "$LICENSE" ] || _package_guess_license
 	_package_guess_dependencies
-	[ -n "$EMAIL" ] || _package_guess_email
+	[ -n "$EMAIL" ] || EMAIL=$(_package_guess_email)
 	[ -n "$FULLNAME" ] || _package_guess_fullname
 
 	#call the proper packaging function
@@ -188,10 +188,15 @@ _package_guess_email()
 
 	case "$scm" in
 		git)
-			EMAIL=$($GIT config user.email)
+			$GIT config user.email			|| return 2
+			return 0
 			;;
 	esac
-	[ -n "$EMAIL" ] || EMAIL="$USER@$DOMAIN"
+	if [ -n "$EMAIL" ]; then
+		echo "$EMAIL"
+	else
+		echo "$USER@$DOMAIN"
+	fi
 }
 
 _package_guess_fullname()
