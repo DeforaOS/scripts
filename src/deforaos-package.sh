@@ -218,7 +218,7 @@ _package_guess_fullname()
 
 _package_guess_license()
 {
-	[ ! -f "COPYING" ]					&& return 2
+	[ -f "COPYING" ]					|| return 2
 
 	#guess the license
 	sum=$($CKSUM COPYING)
