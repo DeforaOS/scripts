@@ -268,18 +268,17 @@ _package_guess_name()
 #package_guess_scm
 _package_guess_scm()
 {
-	#cvs
 	if [ -d "CVS" ]; then
+		#cvs
 		echo "cvs"
-		return 0
-	fi
-	#git
-	#FIXME also look in parent folders
-	if [ -d ".git" ]; then
+	elif [ -d ".git" ]; then
+		#git
+		#FIXME also look in parent folders
 		echo "git"
-		return 0
+	else
+		return 2
 	fi
-	return 2
+	return 0
 }
 
 
