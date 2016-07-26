@@ -94,17 +94,19 @@ _deforaos_package()
 	[ -n "$FULLNAME" ] || _package_guess_fullname
 
 	#call the proper packaging function
-	case "$METHOD" in
-		debian|pkgsrc)
-			_info "Packaging for $METHOD"
-			_package_$METHOD "$revision"
-			[ $? -ne 0 ] && return 2
-			;;
-		*)
-			_error "Unsupported packaging method"
-			return $?
-			;;
-	esac
+	if [ -z "$METHOD" ]; then
+		_error "Unknown packaging method"
+		return $?
+	fi
+	_info "Packaging for $METHOD"
+	"_package_$METHOD" "$revision"
+	res=$?
+	if [ $res -eq 127 ]; then
+		_error "$METHOD: Unsupported packaging method"
+		return $?
+	elif [ $res -ne 0 ]; then
+		return 2
+	fi
 
 	_info "$VENDOR $PACKAGE $VERSION-$revision packaged"
 }
@@ -745,6 +747,8 @@ _package_pkgsrc()
 	#- build the package
 	#- review the differences (if any)
 	#- commit
+
+	return 0
 }
 
 _pkgsrc_descr()
