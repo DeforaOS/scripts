@@ -50,13 +50,16 @@ GREP="grep"
 LINTIAN="lintian"
 MAKE="make"
 MKDIR="mkdir -p"
+MKTEMP="mktemp"
 MV="mv"
 PKGLINT="pkglint"
 PREFIX=
 RM="rm -f"
+RMDIR="rmdir"
 RMD160="rmd160"
 SHA1="sha1"
 SIZE="_size"
+TAR="tar"
 TOUCH="touch"
 TR="tr"
 WC="wc"
@@ -226,8 +229,8 @@ _package_guess_method()
 		#pkgsrc
 		echo "pkgsrc"
 	else
-		_error "Unsupported platform"
-		return $?
+		#tarball
+		echo "tarball"
 	fi
 	return 0
 }
@@ -884,6 +887,34 @@ _pkgsrc_message()
 		&& return 0
 	$DEBUG $CP -- "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/MESSAGE" \
 		"$pkgname/MESSAGE"
+}
+
+
+#package_tarball
+_package_tarball()
+{
+	ret=0
+	revision="$1"
+	destdir="$($MKTEMP -d)/$PACKAGE-${VERSION}-$revision"
+	[ $? -eq 0 ]						|| ret=2
+	objdir="$($MKTEMP -d)/"
+	[ $? -eq 0 ]						|| ret=2
+	archive="$PWD/$PACKAGE-$VERSION-${revision}.tar.gz"
+
+	if [ $ret -ne 0 ]; then
+		[ -n "$destdir" ] && $RMDIR -- "$destdir" "${destdir%/*}"
+		[ -n "$objdir" ] && $RMDIR -- "${objdir%/}"
+		return $ret
+	fi
+	#FIXME also use OBJDIR="$objdir"
+	$MAKE DESTDIR="$destdir" "install" &&
+		(cd "${destdir%/*}" &&
+		$TAR -czf "$archive" "$PACKAGE-${VERSION}-$revision")
+	if [ $? -ne 0 ]; then
+		$RM -r -- "${destdir%/*}" "${objdir%/}" "$archive"
+		return 2
+	fi
+	return 0
 }
 
 
