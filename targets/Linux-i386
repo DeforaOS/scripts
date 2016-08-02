@@ -98,7 +98,7 @@ _image_ramdisk_pre()
   IMAGE_FILE	Where to write the filesystem image\n\
   IMAGE_MODULES	Path to a tar.gz archive of kernel modules (optional)\n\
   IMAGE_SIZE	Size of the filesystem image in kilobytes\n\
-  LDSO		Path to the dynamic loader
+  LDSO		Path to the dynamic loader (optional)
   GENEXT2FS	Command used to generate the ramdisk image"
 
 	#sanity check
@@ -126,8 +126,10 @@ _image_ramdisk_post()
 	$DEBUG $LN -s "../mnt/cdrom/usr/bin/sh" "$DESTDIR/sbin/init" \
 								|| exit 2
 
-	#install loader
-	$DEBUG $INSTALL -m 0755 "$LDSO" "$DESTDIR/lib"		|| exit 2
+	#install dynamic loader
+	if [ -n "$LDSO" ]; then
+		$DEBUG $INSTALL -m 0755 "$LDSO" "$DESTDIR/lib"	|| exit 2
+	fi
 
 	echo
 	echo -n "Creating ramdisk:"
