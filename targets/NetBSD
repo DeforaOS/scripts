@@ -12,6 +12,7 @@
 [ -z "$IMAGE_SIZE"	] && IMAGE_SIZE="65536"
 [ -z "$INSTALLBOOT"	] && INSTALLBOOT="installboot"
 [ -z "$LDSO"		] && LDSO="/libexec/ld.elf_so"
+[ -z "$LIBGCC"		] && LIBGCC=$(gcc -print-libgcc-file-name)
 [ -z "$MBRLABEL"	] && MBRLABEL="mbrlabel"
 [ -z "$MDSETIMAGE"	] && MDSETIMAGE="mdsetimage"
 [ -z "$MKFS"		] && MKFS="newfs"
@@ -33,13 +34,14 @@ _image_image_pre()
   IMAGE_KERNEL	Path to the kernel (optional)
   IMAGE_SIZE	Size of the filesystem image in kilobytes
   IMAGE_TYPE	The type of image to generate
-  LDSO		Path to the dynamic loader
+  LDSO		Path to the dynamic loader (optional)
+  LIBGCC	Path to libgcc (optional)
   MKFS		Command used to format the filesystem"
 
 	#sanity check
 	check "$USAGE" CHOWN DD DESTDIR DEVZERO FDISK IMAGE_BOOT IMAGE_FILE \
-		IMAGE_SIZE INSTALL INSTALLBOOT LDSO LN MBRLABEL MKDIR MKFS \
-		MKNOD MOUNT MV UMOUNT VNCONFIG VND
+		IMAGE_SIZE INSTALL INSTALLBOOT LN MBRLABEL MKDIR MKFS MKNOD \
+		MOUNT MV UMOUNT VNCONFIG VND
 
 	$MKDIR -- "$DESTDIR"					|| return 2
 	$DEBUG $SUDO $UMOUNT "$DESTDIR"
@@ -55,6 +57,12 @@ _image_image_pre()
 	$DEBUG $SUDO $MOUNT "/dev/${VND}e" "$DESTDIR"		&&
 	$DEBUG $SUDO $CHOWN "$UID:$GID" "$DESTDIR"		&&
 	$DEBUG $MKDIR -- "$DESTDIR$PREFIX"
+	[ $? -eq 0 ]						|| return 2
+	if [ -n "$LIBGCC" ]; then
+		$DEBUG $MKDIR -- "$DESTDIR/${LIBGCC%/*}"	|| return 2
+		$DEBUG $INSTALL -m 0644 "$LIBGCC" "$DESTDIR/$LIBGCC" \
+								|| return 2
+	fi
 }
 
 _image_image_boot()
@@ -157,14 +165,16 @@ while /usr/bin/true; do $PREFIX/bin/login; done
 EOF
 	[ $? -eq 0 ]						|| return 2
 	$DEBUG $SUDO $CHMOD -- "0755" "$DESTDIR/etc/rc"		|| return 2
-	#/libexec/ld.elf_so
-	$DEBUG $SUDO $MKDIR -- "$DESTDIR/libexec"		|| return 2
-	$DEBUG $SUDO $INSTALL -m 0555 "$LDSO" "$DESTDIR/libexec/ld.elf_so" \
+	if [ -n "$LDSO" ]; then
+		#/libexec/ld.elf_so
+		$DEBUG $SUDO $MKDIR -- "$DESTDIR/libexec"	|| return 2
+		$DEBUG $SUDO $INSTALL -m 0555 "$LDSO" "$DESTDIR/libexec/ld.elf_so" \
 								|| return 2
-	#/usr/libexec/ld.elf_so
-	$DEBUG $SUDO $MKDIR -- "$DESTDIR$PREFIX/libexec"	|| return 2
-	$DEBUG $SUDO $LN -s "/libexec/ld.elf_so" \
-			"$DESTDIR$PREFIX/libexec"		|| return 2
+		#/usr/libexec/ld.elf_so
+		$DEBUG $SUDO $MKDIR -- "$DESTDIR$PREFIX/libexec"|| return 2
+		$DEBUG $SUDO $LN -s "/libexec/ld.elf_so" \
+				"$DESTDIR$PREFIX/libexec"	|| return 2
+	fi
 	#/proc
 	$DEBUG $SUDO $MKDIR -- "$DESTDIR/proc"			|| return 2
 	#/sbin/init
@@ -199,13 +209,12 @@ _image_iso_pre()
   IMAGE_KERNEL	Path to the kernel
   IMAGE_RAMDISK	Path to a ramdisk image (optional)
   IMAGE_TYPE	The type of image to generate
-  LDSO		Path to the dynamic loader
+  LDSO		Path to the dynamic loader (optional)
   MKISOFS	Command used to format the filesystem"
 	MKISOFS_ARGS="-o bootimage=i386;bootxx,no-emul-boot,rockridge"
 
 	#sanity check
-	check "$USAGE" IMAGE_BOOT IMAGE_FILE IMAGE_KERNEL LDSO MDSETIMAGE \
-		MKISOFS
+	check "$USAGE" IMAGE_BOOT IMAGE_FILE IMAGE_KERNEL MDSETIMAGE MKISOFS
 }
 
 _image_iso_post()
