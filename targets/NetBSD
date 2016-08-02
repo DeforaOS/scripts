@@ -75,17 +75,16 @@ _image_image_boot()
 	[ "${IMAGE_KERNEL%%.gz}" = "$IMAGE_KERNEL" ] || ext=".gz"
 
 	#/boot
-	$DEBUG $SUDO $INSTALL -m 0444 "$IMAGE_BOOT" "$DESTDIR/boot" \
-								|| return 2
+	$DEBUG $INSTALL -m 0444 "$IMAGE_BOOT" "$DESTDIR/boot"	|| return 2
 	#/boot.cfg
 	BOOT_SPLASH="vesa ${resolution}x$depth;boot /netbsd$ext"
 	if [ -n "$IMAGE_SPLASH" ]; then
 		filename="${IMAGE_SPLASH##*/}"
-		$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_SPLASH" \
-			"$DESTDIR/$filename"			|| return 2
+		$DEBUG $INSTALL -m 0644 "$IMAGE_SPLASH" "$DESTDIR/$filename" \
+								|| return 2
 		BOOT_SPLASH="vesa ${resolution}x$depth;splash /$filename;boot /netbsd$ext -z"
 	fi
-	$SUDO sh -c "cat > $DESTDIR/boot.cfg" << EOF
+	cat > "$DESTDIR/boot.cfg" << EOF
 clear=1
 banner=Welcome to DeforaOS
 banner====================
@@ -100,8 +99,8 @@ timeout=$timeout
 EOF
 	[ $? -eq 0 ]						|| return 2
 	if [ -n "$IMAGE_KERNEL" ]; then
-		$DEBUG $SUDO $INSTALL -m 0755 "$IMAGE_KERNEL" \
-			"$DESTDIR/netbsd$ext"			|| return 2
+		$DEBUG $INSTALL -m 0755 "$IMAGE_KERNEL" "$DESTDIR/netbsd$ext" \
+								|| return 2
 		$DEBUG $SUDO $INSTALLBOOT -m "$MACHINE" -o "timeout=10" \
 			"/dev/r${VND}e" "/usr/mdec/$bootxx"	|| return 2
 	fi
@@ -109,14 +108,11 @@ EOF
 
 _image_image_configure()
 {
-	#fix the permissions
-	$DEBUG $SUDO $CHOWN -R "0:0" "$DESTDIR"			|| return 2
 	#/bin/sh
-	$DEBUG $SUDO $MKDIR -- "$DESTDIR/bin"			|| return 2
-	$DEBUG $SUDO $MV "$DESTDIR$PREFIX/bin/sh" "$DESTDIR/bin/sh" \
-								|| return 2
+	$DEBUG $MKDIR -- "$DESTDIR/bin"				|| return 2
+	$DEBUG $MV "$DESTDIR$PREFIX/bin/sh" "$DESTDIR/bin/sh"	|| return 2
 	#create essential device nodes
-	$DEBUG $SUDO $MKDIR -- "$DESTDIR/dev"
+	$DEBUG $MKDIR -- "$DESTDIR/dev"				|| return 2
 	$DEBUG $SUDO $MKNOD -m 0600 "$DESTDIR/dev/console" c 0 0|| return 2
 	$DEBUG $SUDO $MKNOD -m 0600 "$DESTDIR/dev/hd0a" b 0 0	|| return 2
 	$DEBUG $SUDO $MKNOD -m 0600 "$DESTDIR/dev/hd0b" b 0 1	|| return 2
@@ -135,28 +131,28 @@ _image_image_configure()
 	$DEBUG $SUDO $MKNOD -m 0600 "$DESTDIR/dev/rhd0g" c 3 6	|| return 2
 	$DEBUG $SUDO $MKNOD -m 0600 "$DESTDIR/dev/rhd0h" c 3 7	|| return 2
 	#/etc
-	$DEBUG $SUDO $MKDIR -- "$DESTDIR/etc"			|| return 2
+	$DEBUG $MKDIR -- "$DESTDIR/etc"				|| return 2
 	#/etc/fstab
-	$SUDO sh -c "cat > $DESTDIR/etc/fstab" << EOF
+	cat > "$DESTDIR/etc/fstab" << EOF
 /dev/hd0e / ffs rw 1 1
 procfs /proc procfs rw
 EOF
 	[ $? -eq 0 ]						|| return 2
-	$DEBUG $SUDO $CHMOD -- "0644" "$DESTDIR/etc/fstab"	|| return 2
+	$DEBUG $CHMOD -- "0644" "$DESTDIR/etc/fstab"		|| return 2
 	#/etc/group
-	$SUDO sh -c "cat > $DESTDIR/etc/group" << EOF
+	cat > "$DESTDIR/etc/group" << EOF
 wheel:*:0:root
 EOF
 	[ $? -eq 0 ]						|| return 2
-	$DEBUG $SUDO $CHMOD -- "0644" "$DESTDIR/etc/group"	|| return 2
+	$DEBUG $CHMOD -- "0644" "$DESTDIR/etc/group"		|| return 2
 	#/etc/passwd
-	$SUDO sh -c "cat > $DESTDIR/etc/passwd" << EOF
+	cat > "$DESTDIR/etc/passwd" << EOF
 root::0:0:Superuser:/root:/bin/sh
 EOF
 	[ $? -eq 0 ]						|| return 2
-	$DEBUG $SUDO $CHMOD -- "0644" "$DESTDIR/etc/passwd"	|| return 2
+	$DEBUG $CHMOD -- "0644" "$DESTDIR/etc/passwd"		|| return 2
 	#/etc/rc
-	$SUDO sh -c "cat > $DESTDIR/etc/rc" << EOF
+	cat > "$DESTDIR/etc/rc" << EOF
 #!/bin/sh
 
 echo "Welcome to DeforaOS!"
@@ -164,26 +160,32 @@ echo
 while /usr/bin/true; do $PREFIX/bin/login; done
 EOF
 	[ $? -eq 0 ]						|| return 2
-	$DEBUG $SUDO $CHMOD -- "0755" "$DESTDIR/etc/rc"		|| return 2
+	$DEBUG $CHMOD -- "0755" "$DESTDIR/etc/rc"		|| return 2
 	if [ -n "$LDSO" ]; then
 		#/libexec/ld.elf_so
-		$DEBUG $SUDO $MKDIR -- "$DESTDIR/libexec"	|| return 2
-		$DEBUG $SUDO $INSTALL -m 0555 "$LDSO" "$DESTDIR/libexec/ld.elf_so" \
+		$DEBUG $MKDIR -- "$DESTDIR/libexec"		|| return 2
+		$DEBUG $INSTALL -m 0555 "$LDSO" "$DESTDIR/libexec/ld.elf_so" \
 								|| return 2
 		#/usr/libexec/ld.elf_so
-		$DEBUG $SUDO $MKDIR -- "$DESTDIR$PREFIX/libexec"|| return 2
-		$DEBUG $SUDO $LN -s "/libexec/ld.elf_so" \
-				"$DESTDIR$PREFIX/libexec"	|| return 2
+		$DEBUG $MKDIR -- "$DESTDIR$PREFIX/libexec"	|| return 2
+		$DEBUG $LN -s "/libexec/ld.elf_so" "$DESTDIR$PREFIX/libexec" \
+								|| return 2
 	fi
 	#/proc
-	$DEBUG $SUDO $MKDIR -- "$DESTDIR/proc"			|| return 2
+	$DEBUG $MKDIR -- "$DESTDIR/proc"			|| return 2
 	#/sbin/init
-	$DEBUG $SUDO $MKDIR -- "$DESTDIR/sbin"			|| return 2
+	$DEBUG $MKDIR -- "$DESTDIR/sbin"			|| return 2
 	SUBDIRS="Apps/Unix/src/others/others-git/tools" _target \
 			oinit					|| return 2
-	$DEBUG $SUDO $INSTALL -m 0755 \
-		"Apps/Unix/src/others/others-git/tools/oinit" \
+	$DEBUG $INSTALL -m 0755 \
+		"Apps/Unix/src/others/others-git/tools/oinit$EXEEXT" \
 		"$DESTDIR/sbin/init"				|| return 2
+}
+
+_image_image_permissions()
+{
+	#fix the permissions
+	$DEBUG $SUDO $CHOWN -R "0:0" "$DESTDIR"			|| return 2
 }
 
 _image_image_post()
@@ -192,6 +194,10 @@ _image_image_post()
 	ret=$?
 	if [ $ret -eq 0 ]; then
 		_image_image_boot
+		ret=$?
+	fi
+	if [ $ret -eq 0 ]; then
+		_image_image_permissions
 		ret=$?
 	fi
 	$DEBUG $SUDO $UMOUNT "$DESTDIR"
@@ -227,29 +233,27 @@ _image_iso_post()
 	[ "${IMAGE_KERNEL%%.gz}" = "$IMAGE_KERNEL" ] || ext=".gz"
 
 	_image_image_configure					|| return 2
-	$DEBUG $SUDO $INSTALL -m 0755 "$IMAGE_KERNEL" "$DESTDIR/netbsd$ext" \
+	$DEBUG $INSTALL -m 0755 "$IMAGE_KERNEL" "$DESTDIR/netbsd$ext" \
 								|| return 2
 	if [ -n "$IMAGE_RAMDISK" ]; then
 		#uncompress the kernel if necessary
 		if [ -n "$ext" ]; then
-			$DEBUG $SUDO $GZIP -u "$DESTDIR/netbsd$ext" \
-								|| return 2
+			$DEBUG $GZIP -u "$DESTDIR/netbsd$ext"	|| return 2
 		fi
-		$DEBUG $SUDO $MDSETIMAGE "$DESTDIR/netbsd" "$IMAGE_RAMDISK" \
+		$DEBUG $MDSETIMAGE "$DESTDIR/netbsd" "$IMAGE_RAMDISK" \
 								|| return 2
-		$DEBUG $SUDO $GZIP -9 "$DESTDIR/netbsd"		|| return 2
+		$DEBUG $GZIP -9 "$DESTDIR/netbsd"		|| return 2
 		ext=".gz"
 	fi
-	$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_BOOT" "$DESTDIR/boot" \
-								|| return 2
+	$DEBUG $INSTALL -m 0644 "$IMAGE_BOOT" "$DESTDIR/boot"	|| return 2
 	BOOT_SPLASH="vesa ${resolution}x$depth;boot /netbsd$ext"
 	if [ -n "$IMAGE_SPLASH" ]; then
 		filename="${IMAGE_SPLASH##*/}"
-		$DEBUG $SUDO $INSTALL -m 0644 "$IMAGE_SPLASH" \
-			"$DESTDIR/$filename"			|| return 2
+		$DEBUG $INSTALL -m 0644 "$IMAGE_SPLASH" "$DESTDIR/$filename" \
+								|| return 2
 		BOOT_SPLASH="vesa ${resolution}x$depth;splash /$filename;boot /netbsd$ext -z"
 	fi
-	$SUDO sh -c "cat > $DESTDIR/boot.cfg" << EOF
+	cat > "$DESTDIR/boot.cfg" << EOF
 clear=1
 banner=Welcome to DeforaOS
 banner====================
@@ -265,5 +269,6 @@ EOF
 	$DEBUG $INSTALL -m 0644 "/usr/mdec/$bootxx" "bootxx"	|| return 2
 	$DEBUG $INSTALLBOOT -m "$MACHINE" -o "$BOOTOPTIONS" -e bootxx \
 								|| return 2
+	_image_image_permissions				|| return 2
 	$DEBUG $MKISOFS $MKISOFS_ARGS "$IMAGE_FILE" "$DESTDIR"	|| return 2
 }
