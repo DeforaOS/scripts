@@ -231,7 +231,12 @@ _package_guess_license()
 		3336459709)
 			LICENSE="GNU LGPL 3"
 			;;
+		*)
+			return 2
+			;;
 	esac
+	echo "$LICENSE"
+	return 0
 }
 
 _package_guess_method()
