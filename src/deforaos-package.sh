@@ -875,9 +875,17 @@ EOF
 			[ -f "$i" ] || continue
 			[ "${i%.css.xml}" = "$i" ] || continue
 			page="${i#doc/}"
+			page="${page%.xml}.html"
+			echo "	\${MV} \${DESTDIR}\${PREFIX}/share/man/html1/$page \${DESTDIR}\${PREFIX}/\${PKGMANDIR}/html1/$page"
+		done | $SORT
+		for i in doc/*.xml; do
+			[ -f "$i" ] || continue
+			[ "${i%.css.xml}" = "$i" ] || continue
+			page="${i#doc/}"
 			page="${page%.xml}.1"
 			echo "	\${MV} \${DESTDIR}\${PREFIX}/share/man/man1/$page \${DESTDIR}\${PREFIX}/\${PKGMANDIR}/man1/$page"
 		done | $SORT
+		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/html1"
 		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/man1"
 		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man"
 		echo ".endif"
