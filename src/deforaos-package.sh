@@ -867,6 +867,9 @@ EOF
 	#fix installation path for manual pages
 	if [ $DEPEND_docbookxsl -eq 1 ]; then
 		echo ""
+		echo ".include \"../../mk/bsd.prefs.mk\""
+		echo ""
+		echo ".if \${PKGMANDIR} != \"share/man\""
 		echo "post-install:"
 		for i in doc/*.xml; do
 			[ -f "$i" ] || continue
@@ -876,6 +879,7 @@ EOF
 		done | $SORT
 		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/man1"
 		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man"
+		echo ".endif"
 	fi
 
 	#options
