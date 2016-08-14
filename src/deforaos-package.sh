@@ -777,6 +777,30 @@ _package_pkgsrc()
 	return 0
 }
 
+_pkgsrc_depends()
+{
+	for file in data/*.pc; do
+		[ -f "$file" ] || continue
+		while read header values; do
+			[ "$header" = "Requires:" ] || continue
+			echo "$values"
+			for require in $values; do
+				case "$require" in
+					libDesktop)
+						echo "x11/deforaos-libdesktop/buildlink3.mk"
+						;;
+					libSystem)
+						echo "devel/deforaos-libsystem/buildlink3.mk"
+						;;
+				esac
+			done
+		done < "$file"
+	done | $SORT | $UNIQ
+	[ $DEPEND_gtkdoc -eq 1 ] && echo 'textproc/gtk-doc/buildlink3.mk'
+	[ $DEPEND_desktop -eq 1 ] && echo 'sysutils/desktop-file-utils/desktopdb.mk'
+	echo 'mk/bsd.pkg.mk'
+}
+
 _pkgsrc_descr()
 {
 	if [ -f "$PKGSRC_ROOT/$PKGSRC_CATEGORY/$pkgname/DESCR" ]; then
@@ -926,11 +950,9 @@ EOF
 
 	#dependencies
 	echo ""
-	[ $DEPEND_gtkdoc -eq 1 ] &&
-		echo '.include "../../textproc/gtk-doc/buildlink3.mk"'
-	[ $DEPEND_desktop -eq 1 ] &&
-		echo '.include "../../sysutils/desktop-file-utils/desktopdb.mk"'
-	echo '.include "../../mk/bsd.pkg.mk"'
+	for depend in $(_pkgsrc_depends); do
+		echo ".include \"../../$depend\""
+	done
 }
 
 _pkgsrc_message()
