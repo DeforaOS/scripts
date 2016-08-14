@@ -63,6 +63,7 @@ SORT="sort"
 TAR="tar"
 TOUCH="touch"
 TR="tr"
+UNIQ="uniq"
 WC="wc"
 XMLLINT="xmllint"
 YEAR="$(date +%Y)"
@@ -811,6 +812,7 @@ EOF
 _pkgsrc_makefile()
 {
 	xpath="string(/refentry/refmeta/manvolnum)"
+	sections=
 
 	$CAT << EOF
 # \$NetBSD\$
@@ -879,6 +881,7 @@ EOF
 		echo ""
 		echo ".if \${PKGMANDIR} != \"share/man\""
 		echo "post-install:"
+		#HTML pages
 		for i in doc/*.xml; do
 			[ -f "$i" ] || continue
 			[ "${i%.css.xml}" = "$i" ] || continue
@@ -888,6 +891,7 @@ EOF
 			page="${page%.xml}.html"
 			echo "	\${MV} \${DESTDIR}\${PREFIX}/share/man/html$section/$page \${DESTDIR}\${PREFIX}/\${PKGMANDIR}/html$section/$page"
 		done | $SORT
+		#manual pages
 		for i in doc/*.xml; do
 			[ -f "$i" ] || continue
 			[ "${i%.css.xml}" = "$i" ] || continue
@@ -897,8 +901,18 @@ EOF
 			page="${page%.xml}.1"
 			echo "	\${MV} \${DESTDIR}\${PREFIX}/share/man/man$section/$page \${DESTDIR}\${PREFIX}/\${PKGMANDIR}/man$section/$page"
 		done | $SORT
-		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/html1"
-		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/man1"
+		#remove directories
+		for i in doc/*.xml; do
+			[ -f "$i" ] || continue
+			[ "${i%.css.xml}" = "$i" ] || continue
+			section=$($XMLLINT --xpath "$xpath" "$i")
+			[ -n "$section" ] || section="1"
+			sections="$sections $section"
+		done
+		for section in $sections; do
+			echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/html$section"
+			echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/man$section"
+		done | $SORT | $UNIQ
 		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man"
 		echo ".endif"
 	fi
