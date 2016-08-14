@@ -227,6 +227,9 @@ _package_guess_license()
 		199341746)
 			LICENSE="GNU GPL 3"
 			;;
+		3336459709)
+			LICENSE="GNU LGPL 3"
+			;;
 	esac
 }
 
@@ -697,6 +700,9 @@ _package_pkgsrc()
 	case "$LICENSE" in
 		"GNU GPL 3")
 			license="gnu-gpl-v3"
+			;;
+		"GNU LGPL 3")
+			license="gnu-lgpl-v3"
 			;;
 	esac
 	[ -z "$license" ] && _warning "Unknown license"
