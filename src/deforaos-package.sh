@@ -64,6 +64,7 @@ TAR="tar"
 TOUCH="touch"
 TR="tr"
 WC="wc"
+XMLLINT="xmllint"
 YEAR="$(date +%Y)"
 #dependencies
 DEPEND_desktop=0
@@ -809,6 +810,8 @@ EOF
 
 _pkgsrc_makefile()
 {
+	xpath="string(/refentry/refmeta/manvolnum)"
+
 	$CAT << EOF
 # \$NetBSD\$
 
@@ -879,16 +882,20 @@ EOF
 		for i in doc/*.xml; do
 			[ -f "$i" ] || continue
 			[ "${i%.css.xml}" = "$i" ] || continue
+			section=$($XMLLINT --xpath "$xpath" "$i")
+			[ -n "$section" ] || section="1"
 			page="${i#doc/}"
 			page="${page%.xml}.html"
-			echo "	\${MV} \${DESTDIR}\${PREFIX}/share/man/html1/$page \${DESTDIR}\${PREFIX}/\${PKGMANDIR}/html1/$page"
+			echo "	\${MV} \${DESTDIR}\${PREFIX}/share/man/html$section/$page \${DESTDIR}\${PREFIX}/\${PKGMANDIR}/html$section/$page"
 		done | $SORT
 		for i in doc/*.xml; do
 			[ -f "$i" ] || continue
 			[ "${i%.css.xml}" = "$i" ] || continue
+			section=$($XMLLINT --xpath "$xpath" "$i")
+			[ -n "$section" ] || section="1"
 			page="${i#doc/}"
 			page="${page%.xml}.1"
-			echo "	\${MV} \${DESTDIR}\${PREFIX}/share/man/man1/$page \${DESTDIR}\${PREFIX}/\${PKGMANDIR}/man1/$page"
+			echo "	\${MV} \${DESTDIR}\${PREFIX}/share/man/man$section/$page \${DESTDIR}\${PREFIX}/\${PKGMANDIR}/man$section/$page"
 		done | $SORT
 		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/html1"
 		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/man1"
