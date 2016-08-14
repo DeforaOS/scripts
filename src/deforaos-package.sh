@@ -59,6 +59,7 @@ RMDIR="rmdir"
 RMD160="rmd160"
 SHA1="sha1"
 SIZE="_size"
+SORT="sort"
 TAR="tar"
 TOUCH="touch"
 TR="tr"
@@ -872,7 +873,7 @@ EOF
 			page="${i#doc/}"
 			page="${page%.xml}.1"
 			echo "	\${MV} \${DESTDIR}\${PREFIX}/share/man/man1/$page \${DESTDIR}\${PREFIX}/\${PKGMANDIR}/man1/$page"
-		done
+		done | $SORT
 		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/man1"
 		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man"
 	fi
