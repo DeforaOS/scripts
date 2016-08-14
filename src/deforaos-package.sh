@@ -873,6 +873,7 @@ EOF
 		echo "post-install:"
 		for i in doc/*.xml; do
 			[ -f "$i" ] || continue
+			[ "${i%.css.xml}" = "$i" ] || continue
 			page="${i#doc/}"
 			page="${page%.xml}.1"
 			echo "	\${MV} \${DESTDIR}\${PREFIX}/share/man/man1/$page \${DESTDIR}\${PREFIX}/\${PKGMANDIR}/man1/$page"
