@@ -786,6 +786,12 @@ _pkgsrc_depends()
 			echo "$values"
 			for require in $values; do
 				case "$require" in
+					gtk+-2.0)
+						echo "x11/gtk2/buildlink3.mk"
+						;;
+					gtk+-3.0)
+						echo "x11/gtk3/buildlink3.mk"
+						;;
 					libDesktop)
 						echo "x11/deforaos-libdesktop/buildlink3.mk"
 						;;
