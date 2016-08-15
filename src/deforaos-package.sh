@@ -931,12 +931,11 @@ EOF
 			[ "${i%.css.xml}" = "$i" ] || continue
 			section=$($XMLLINT --xpath "$xpath" "$i")
 			[ -n "$section" ] || section="1"
-			sections="$sections $section"
-		done
-		for section in $sections; do
+			echo "$section"
+		done | $SORT | $UNIQ | while read section; do
 			echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/html$section"
 			echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man/man$section"
-		done | $SORT | $UNIQ
+		done | $SORT
 		echo "	\${RMDIR} \${DESTDIR}\${PREFIX}/share/man"
 		echo ".endif"
 	fi
