@@ -5,7 +5,7 @@
 
 #includes
 #XXX hardcoded
-. "`dirname $0`/Apps/Devel/src/scripts/scripts-git/targets/NetBSD"
+. "$(dirname '$0')/Apps/Devel/src/scripts/scripts-git/targets/NetBSD"
 
 
 #functions

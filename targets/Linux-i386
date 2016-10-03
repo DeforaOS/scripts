@@ -11,7 +11,7 @@
 
 #includes
 #XXX hardcoded
-. "`dirname $0`/Apps/Devel/src/scripts/scripts-git/targets/Linux"
+. "$(dirname '$0')/Apps/Devel/src/scripts/scripts-git/targets/Linux"
 
 
 #functions

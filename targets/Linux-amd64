@@ -5,4 +5,4 @@
 
 #includes
 #XXX hardcoded
-. "`dirname $0`/Apps/Devel/src/scripts/scripts-git/targets/Linux-i386"
+. "$(dirname '$0')/Apps/Devel/src/scripts/scripts-git/targets/Linux-i386"
