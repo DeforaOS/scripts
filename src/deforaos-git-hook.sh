@@ -243,7 +243,7 @@ if [ $# -eq 0 ]; then
 fi
 
 hook="$1"
-shift 1
+shift
 case "$hook" in
 	"post-commit")
 		_hook_post_commit "$@"
