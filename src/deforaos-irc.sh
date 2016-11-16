@@ -26,7 +26,7 @@ NOTICE="/NOTICE"
 PROGNAME="deforaos-irc.sh"
 QUIT="/QUIT"
 #executables
-FORTUNE="fortune -s"
+FORTUNE="fortune -s -n 50"
 HEAD="head"
 II="ii -i $PREFIX"
 KILL="kill"
