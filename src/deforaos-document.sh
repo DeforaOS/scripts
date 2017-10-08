@@ -24,6 +24,7 @@ DESTDIR="/var/www"
 DEVNULL="/dev/null"
 EMAIL="webmaster@defora.org"
 HOMEPAGE="https://www.defora.org"
+PROGNAME="deforaos-document.sh"
 ROOT=
 SRC=
 
@@ -172,8 +173,8 @@ _deforaos_document_git()
 #usage
 _usage()
 {
-	echo "Usage: deforaos-document.sh [-C | -G][-O name=value...]" 1>&2
-	echo "       deforaos-document.sh -m [-C | -G][-O name=value...]" 1>&2
+	echo "Usage: $PROGNAME [-C | -G][-O name=value...]" 1>&2
+	echo "       $PROGNAME -m [-C | -G][-O name=value...]" 1>&2
 	return 1
 }
 
