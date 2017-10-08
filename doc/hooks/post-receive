@@ -71,7 +71,7 @@ _hook_mirror()
 				continue
 			fi
 		fi
-		#refresh the repository
+		#mirror the repository
 		(unset GIT_DIR;
 			cd "$mirror" &&
 			$GIT fetch -q "$GIT_REMOTE" &&
