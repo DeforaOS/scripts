@@ -23,7 +23,7 @@ DATE=$(date '+%Y%m%d')
 DESTDIR="/var/www"
 DEVNULL="/dev/null"
 EMAIL="webmaster@defora.org"
-HOMEPAGE="http://www.defora.org"
+HOMEPAGE="https://www.defora.org"
 ROOT=
 SRC=
 
@@ -32,7 +32,7 @@ CVSMODULE="DeforaOS"
 [ -z "$CVSROOT" ] && CVSROOT=":pserver:anonymous@anoncvs.defora.org:/home/cvs"
 
 #Git
-[ -z "$GITROOT" ] && GITROOT="http://git.defora.org/git/DeforaOS.git"
+[ -z "$GITROOT" ] && GITROOT="https://git.defora.org/git/DeforaOS.git"
 
 #executables
 CONFIGURE="configure"
