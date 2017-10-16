@@ -160,7 +160,7 @@ _info()
 _usage()
 {
 	echo "Usage: $PROGNAME [-Nqv] -s server -c channel [-n nickname]" 1>&2
-	echo "  -n	Use notice" 1>&2
+	echo "  -N	Use notice" 1>&2
 	echo "  -q	Quiet mode (default)" 1>&2
 	echo "  -v	Be more verbose" 1>&2
 	return 1
