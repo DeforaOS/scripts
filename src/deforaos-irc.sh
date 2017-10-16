@@ -26,6 +26,7 @@ NOTICE="/NOTICE"
 PROGNAME="deforaos-irc.sh"
 QUIT="/QUIT"
 #executables
+CUT="cut"
 FORTUNE="fortune -s"
 HEAD="head"
 II="ii -i $PREFIX"
@@ -121,7 +122,8 @@ _irc()
 	if [ -n "$pid" ]; then
 		#quit the server
 		_info "$server: Disconnecting from server"
-		echo "$QUIT :$($FORTUNE | $HEAD -n 1)" > "$serverin"
+		fortune=$($FORTUNE | $HEAD -n 1 | $CUT -c 1-50)
+		echo "$QUIT :$fortune" > "$serverin"
 		#wait until the server is disconnected
 		#FIXME ii does not automatically clean up when quitting
 		loop=0
