@@ -24,6 +24,7 @@ DESTDIR="/var/www"
 DEVNULL="/dev/null"
 EMAIL="devel@lists.defora.org"
 HOMEPAGE="https://www.defora.org"
+PROGNAME="deforaos-update.sh"
 ROOT=
 SRC=
 
@@ -143,8 +144,8 @@ _deforaos_update_git()
 #usage
 _usage()
 {
-	echo "Usage: deforaos-update.sh [-C | -G][-O name=value...]" 1>&2
-	echo "       deforaos-update.sh -m [-C | -G][-O name=value...]" 1>&2
+	echo "Usage: $PROGNAME [-C | -G][-O name=value...]" 1>&2
+	echo "       $PROGNAME -m [-C | -G][-O name=value...]" 1>&2
 	return 1
 }
 
