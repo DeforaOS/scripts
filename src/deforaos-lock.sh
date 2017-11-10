@@ -17,6 +17,7 @@
 
 
 #variables
+PROGNAME="deforaos-lock.sh"
 #executables
 LOCK="mkdir"
 UNLOCK="rmdir"
@@ -39,7 +40,7 @@ _lock()
 #usage
 _usage()
 {
-	echo "Usage: deforaos-lock.sh -- command [arguments...]" 1>&2
+	echo "Usage: $PROGNAME -- command [arguments...]" 1>&2
 	return 1
 }
 
