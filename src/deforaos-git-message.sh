@@ -19,7 +19,7 @@
 #environment
 #variables
 GITWEB=
-PROGNAME="deforaos-git-hook.sh"
+PROGNAME="deforaos-git-message.sh"
 REDMINE=
 #executables
 GIT="git"
@@ -50,8 +50,31 @@ _error()
 }
 
 
-#hook_post_commit
-_hook_post_commit()
+#link
+_link_branch()
+{
+	repository="$1"
+	branch="$2"
+
+	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=shortlog;h=refs/heads/$branch"
+	[ -n "$REDMINE" ] && echo "$REDMINE/repository/${repository}/show?rev=$branch" | _tolower
+}
+
+
+#link_commit
+_link_commit()
+{
+	repository="$1"
+	rev="$2"
+	shortrev=$(_shorten 8 "$rev")
+
+	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=commit;h=$shortrev"
+	[ -n "$REDMINE" ] && echo "$REDMINE/repository/${repository}/revisions/$shortrev" | _tolower
+}
+
+
+#message_post_commit
+_message_post_commit()
 {
 	if [ $# -ne 0 ]; then
 		_usage "post-commit"
@@ -59,14 +82,14 @@ _hook_post_commit()
 	fi
 	while read oldrev newrev refname; do
 		#XXX ignore errors
-		_hook_update "$refname" "$oldrev" "$newrev"
+		_message_update "$refname" "$oldrev" "$newrev"
 	done
 	return 0
 }
 
 
-#hook_post_receive
-_hook_post_receive()
+#message_post_receive
+_message_post_receive()
 {
 	if [ $# -ne 0 ]; then
 		_usage "post-receive"
@@ -74,14 +97,14 @@ _hook_post_receive()
 	fi
 	while read oldrev newrev refname; do
 		#XXX ignore errors
-		_hook_update "$refname" "$oldrev" "$newrev"
+		_message_update "$refname" "$oldrev" "$newrev"
 	done
 	return 0
 }
 
 
-#hook_update
-_hook_update()
+#message_update
+_message_update()
 {
 	if [ $# -ne 3 ]; then
 		_usage "update refname oldrev newrev"
@@ -174,29 +197,6 @@ _hook_update()
 }
 
 
-#link
-_link_branch()
-{
-	repository="$1"
-	branch="$2"
-
-	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=shortlog;h=refs/heads/$branch"
-	[ -n "$REDMINE" ] && echo "$REDMINE/repository/${repository}/show?rev=$branch" | _tolower
-}
-
-
-#link_commit
-_link_commit()
-{
-	repository="$1"
-	rev="$2"
-	shortrev=$(_shorten 8 "$rev")
-
-	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=commit;h=$shortrev"
-	[ -n "$REDMINE" ] && echo "$REDMINE/repository/${repository}/revisions/$shortrev" | _tolower
-}
-
-
 #_tolower
 _tolower()
 {
@@ -246,15 +246,15 @@ hook="$1"
 shift
 case "$hook" in
 	"post-commit")
-		_hook_post_commit "$@"
+		_message_post_commit "$@"
 		exit $?
 		;;
 	"post-receive")
-		_hook_post_receive "$@"
+		_message_post_receive "$@"
 		exit $?
 		;;
 	"update")
-		_hook_update "$@"
+		_message_update "$@"
 		exit $?
 		;;
 	*)
