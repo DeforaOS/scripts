@@ -116,7 +116,7 @@ _message_update()
 	nullrev="0000000000000000000000000000000000000000"
 	author="$GL_USER"
 	[ -z "$author" ] && author="$USER"
-	repository="$GL_REPO"
+	repository="${GL_REPO#DeforaOS/}"
 	branch=
 	type="push"
 
