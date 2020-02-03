@@ -73,10 +73,10 @@ _irc()
 		#output the text
 		while read line; do
 			if [ $notice -eq 0 ]; then
-				_info "$channel: Messaging user"
+				_info "$server: Messaging user $channel"
 				output="$PRIVMSG $channel $line"
 			else
-				_info "$channel: Notifying user"
+				_info "$server: Notifying user $channel"
 				output="$NOTICE $channel :$line"
 			fi
 			echo "$output"
@@ -85,7 +85,7 @@ _irc()
 	else
 		#join the channel
 		if [ ! -w "$channelin" ]; then
-			_info "$channel: Joining channel"
+			_info "$server: Joining channel $channel"
 			echo "$JOIN $channel" > "$serverin"
 		fi
 		#wait until the channel is joined
@@ -101,13 +101,13 @@ _irc()
 		#output the text
 		if [ $ret -eq 0 ]; then
 			if [ $notice -eq 0 ]; then
-				_info "$channel: Joined channel"
+				_info "$server: Joined channel $channel"
 				while read line; do
 					echo "$line"
 					$SLEEP
 				done > "$channelin"
 			else
-				_info "$channel: Notifying channel"
+				_info "$server: Notifying channel $channel"
 				while read line; do
 					echo "$NOTICE $channel :$line"
 					$SLEEP
