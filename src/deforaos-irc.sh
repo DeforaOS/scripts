@@ -121,7 +121,7 @@ _irc()
 		#quit the server
 		_info "$server: Disconnecting from server"
 		fortune=$($FORTUNE | $HEAD -n 1 | $CUT -c 1-50)
-		echo "$QUIT :$fortune" > "$serverin"
+		echo "$QUIT $fortune" > "$serverin"
 		#wait until the server is disconnected
 		#FIXME ii does not automatically clean up when quitting
 		loop=0
