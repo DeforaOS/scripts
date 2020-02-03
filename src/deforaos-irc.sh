@@ -45,7 +45,7 @@ _irc()
 		return 1
 	fi
 	ret=0
-	pid=
+	pid=0
 	server=$(echo "$1" | $TR A-Z a-z)
 	port="$2"
 	nickname="$3"
@@ -56,9 +56,8 @@ _irc()
 	#connect to the server
 	if [ ! -w "$serverin" ]; then
 		_info "$server: Connecting to server"
-		#FIXME really keep track of pid
 		$II -s "$server" -p "$port" -n "$nickname" &
-		pid=0
+		pid=$!
 	fi
 	#wait until the server is connected to
 	loop=0
@@ -119,7 +118,7 @@ _irc()
 			_error "$channel: Could not join channel"
 		fi
 	fi
-	if [ -n "$pid" ]; then
+	if [ $pid -gt 0 ]; then
 		#quit the server
 		_info "$server: Disconnecting from server"
 		fortune=$($FORTUNE | $HEAD -n 1 | $CUT -c 1-50)
