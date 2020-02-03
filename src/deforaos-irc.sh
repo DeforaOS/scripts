@@ -32,7 +32,7 @@ HEAD="head"
 II="ii -i $PREFIX"
 KILL="kill"
 RM="rm -f"
-SLEEP="sleep 1"
+SLEEP="sleep 2"
 TR="tr"
 
 
