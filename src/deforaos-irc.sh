@@ -23,7 +23,7 @@ NOTICE="/NOTICE"
 PREFIX="/var/tmp/ii"
 PRIVMSG="/j"
 PROGNAME="deforaos-irc.sh"
-QUIT="/QUIT"
+QUIT="/q"
 #executables
 CUT="cut"
 FORTUNE="fortune -s"
