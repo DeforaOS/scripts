@@ -22,7 +22,6 @@ JOIN="/j"
 NOTICE="/NOTICE"
 PREFIX="/var/tmp/ii"
 PRIVMSG="/j"
-NOTICE="/NOTICE"
 PROGNAME="deforaos-irc.sh"
 QUIT="/QUIT"
 #executables
