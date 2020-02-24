@@ -1,5 +1,5 @@
 #!/bin/sh
-#Copyright (c) 2014-2019 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2020 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions
@@ -25,70 +25,38 @@
 
 
 #variables
-GIT_GITWEB="https://git.defora.org/gitweb"
-HOOKS="irc jobs"
-IRC_CHANNEL="#DeforaOS"
-IRC_SERVER="irc.oftc.net"
-JOBS_BRANCH_MASTER="$PREFIX/deforaos-git-mirror.sh"
+GIT_MIRROR="/home/defora/git"
+GIT_REMOTE="origin"
 PREFIX="/usr/local"
 #executables
 GIT="/usr/bin/git"
-GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message.sh"
-IRC="$PREFIX/libexec/deforaos-irc.sh -N -s $IRC_SERVER -c $IRC_CHANNEL -n defora"
-JOBS="$PREFIX/bin/deforaos-jobs.sh -d /home/jobs"
-MKTEMP="/bin/mktemp"
-RM="/bin/rm -f"
 
 
 #functions
-#hook_jobs
-_hook_jobs()
+#git_mirror
+_git_mirror()
 {
-	while read oldrev newrev refname; do
-		case "$refname" in
-			refs/heads/*)
-				_jobs_branch "${refname#refs/heads/}" "$GL_REPO"
-				;;
-		esac
-	done
-	return $ret
-}
+	repository="$1"
+	mirror="$GIT_MIRROR/${repository}.git"
 
-_jobs_branch()
-{
-	branch="$1"
-	repository="$2"
-
-	if [ "$branch" = "master" ]; then
-		for job in $JOBS_BRANCH_MASTER; do
-			$JOBS add "$job $repository"
-		done
+	if [ ! -d "$mirror" ]; then
+		#clone the repository
+		$GIT clone "$HOME/repositories/${repository}.git" "$mirror"
+		if [ $? -ne 0 ]; then
+			echo "$repository: Could not create mirror" 1>&2
+			continue
+		fi
 	fi
-}
-
-
-#hook_irc
-_hook_irc()
-{
-	$GIT_MESSAGE -O GITWEB="$GIT_GITWEB" "post-receive" | $IRC
-	#ignore errors
-	return 0
+	#mirror the repository
+	(cd "$mirror" &&
+		$GIT fetch -q "$GIT_REMOTE" &&
+		$GIT reset -q --hard "$GIT_REMOTE/$branch")	|| return 2
 }
 
 
 #main
-#save a copy of the output
-tmpfile=$($MKTEMP)
-[ $? -eq 0 ]							|| exit 2
-while read line; do
-	echo "$line" >> "$tmpfile"
-done
-#chain the hooks
-ret=0
-for hook in $HOOKS; do
-	"_hook_$hook" < "$tmpfile"				|| ret=2
-done
-#clean up
-$RM -- "$tmpfile"						|| exit 2
-
-exit $ret
+if [ $# -ne 1 ]; then
+	_usage
+	exit $?
+fi
+_git_mirror "$1"
