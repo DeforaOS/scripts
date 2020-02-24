@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2014-2016 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2014-2017 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -58,7 +58,7 @@ _shlint()
 	done < "$PROJECTCONF"
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
-		for filename in $($FIND "../$subdir" -name '*.sh' | $SORT); do
+		for filename in $($FIND "../$subdir" -type f -a -name '*.sh' | $SORT); do
 			_shlint_file "$filename"
 			if [ $? -eq 0 ]; then
 				echo "$filename:"
@@ -109,7 +109,7 @@ _debug()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-c] target" 1>&2
+	echo "Usage: $PROGNAME [-c] target..." 1>&2
 	return 1
 }
 
@@ -124,10 +124,13 @@ _warning()
 
 #main
 clean=0
-while getopts "cP:" name; do
+while getopts "cO:P:" name; do
 	case "$name" in
 		c)
 			clean=1
+			;;
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
 		P)
 			#XXX ignored for compatibility
@@ -139,14 +142,18 @@ while getopts "cP:" name; do
 	esac
 done
 shift $((OPTIND - 1))
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
 	_usage
 	exit $?
 fi
-target="$1"
 
 #clean
 [ $clean -ne 0 ] && exit 0
 
 exec 3>&1
-_shlint > "$target"
+while [ $# -gt 0 ]; do
+	target="$1"
+	shift
+
+	_shlint > "$target"					|| exit 2
+done
