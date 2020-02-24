@@ -89,15 +89,17 @@ _database_exec()
 #database_init
 _database_init()
 {
+	ret=0
+
 	if [ ! -f "$DATABASE_CONFFILE" ]; then
 		echo "filename=$DATABASE_FILE" > "$DATABASE_CONFFILE"
 	fi
 	if [ ! -f "$DATABASE_FILE" ]; then
 		_database_lock					|| return 3
-		_database_query "$QUERY_INIT" > "$DEVNULL"	|| return 2
+		_database_query "$QUERY_INIT" > "$DEVNULL"	|| ret=2
 		_database_unlock				|| return 4
 	fi
-	return 0
+	return $ret
 }
 
 
