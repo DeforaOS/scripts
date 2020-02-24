@@ -59,7 +59,7 @@ _jobs_branch()
 	branch="$1"
 	repository="$2"
 
-	if [ "$branch" = "master" ]; then
+	if [ "$branch" = "master" -a -n "$JOBS_BRANCH_MASTER" ]; then
 		for job in $JOBS_BRANCH_MASTER; do
 			$JOBS add "$job $repository"
 		done
@@ -85,7 +85,7 @@ while read line; do
 done
 #chain the hooks
 ret=0
-for hook in $HOOKS; do
+[ -n "$HOOKS" ] && for hook in $HOOKS; do
 	"_hook_$hook" < "$tmpfile"				|| ret=2
 done
 #clean up
