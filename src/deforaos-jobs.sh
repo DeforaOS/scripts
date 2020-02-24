@@ -154,8 +154,8 @@ _error()
 _usage()
 {
 	echo "Usage: $PROGNAME_JOBS add command" 1>&2
-	echo "       $PROGNAME_JOBS list" 1>&2
 	echo "       $PROGNAME_JOBS exec" 1>&2
+	echo "       $PROGNAME_JOBS list" 1>&2
 	return 1
 }
 
