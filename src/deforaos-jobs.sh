@@ -153,21 +153,25 @@ _error()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME_JOBS add command" 1>&2
-	echo "       $PROGNAME_JOBS exec" 1>&2
-	echo "       $PROGNAME_JOBS list" 1>&2
+	echo "Usage: $PROGNAME_JOBS [-d directory] add command" 1>&2
+	echo "       $PROGNAME_JOBS [-d directory] exec" 1>&2
+	echo "       $PROGNAME_JOBS [-d directory] list" 1>&2
 	return 1
 }
 
 
 #main
-while getopts "DO:" name; do
+directory=
+while getopts "DO:d:" name; do
 	case "$name" in
 		D)
 			DEBUG="_debug"
 			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
+		d)
+			directory="$OPTARG"
 			;;
 		?)
 			_usage
@@ -194,4 +198,8 @@ case "$1" in
 esac
 shift
 
-"$method" "$@"
+if [ -n "$directory" ]; then
+	(cd "$directory" && "$method" "$@")
+else
+	"$method" "$@"
+fi
