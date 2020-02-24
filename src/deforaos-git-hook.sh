@@ -30,10 +30,11 @@ GIT_MIRROR="/home/defora/git"
 GIT_REMOTE="origin"
 IRC_CHANNEL="#DeforaOS"
 IRC_SERVER="irc.oftc.net"
+PREFIX="/usr/local"
 #executables
 GIT="/usr/bin/git"
-GIT_MESSAGE="/usr/local/libexec/deforaos-git-message.sh"
-IRC="/usr/local/libexec/deforaos-irc.sh -N -s $IRC_SERVER -c $IRC_CHANNEL -n defora"
+GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message.sh"
+IRC="$PREFIX/libexec/deforaos-irc.sh -N -s $IRC_SERVER -c $IRC_CHANNEL -n defora"
 MKTEMP="/bin/mktemp"
 RM="/bin/rm -f"
 
