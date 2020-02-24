@@ -14,6 +14,7 @@ DATABASE_ENGINE="sqlite3"
 DATABASE_FILE="deforaos-jobs.db"
 DATABASE_INITFILE="deforaos-jobs.sql"
 DEVNULL="/dev/null"
+PREFIX="/usr/local"
 PROGNAME_JOBS="defora-jobs"
 QUERY_ADD_BEGIN="INSERT INTO jobs (command) VALUES ('"
 QUERY_ADD_END="')"
@@ -21,7 +22,7 @@ QUERY_EXEC_SELECT="SELECT jobs_id, command FROM jobs WHERE started IS NULL ORDER
 QUERY_INIT="CREATE TABLE jobs (jobs_id INTEGER PRIMARY KEY, timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, command VARCHAR(255), started TIMESTAMP DEFAULT NULL, pid INTEGER DEFAULT NULL, code INTEGER DEFAULT NULL, completed TIMESTAMP DEFAULT NULL)"
 QUERY_LIST="SELECT * FROM jobs"
 #executables
-DATABASE="database"
+DATABASE="$PREFIX/bin/database"
 DEBUG=
 LOCK="mkdir"
 UNLOCK="rmdir"
