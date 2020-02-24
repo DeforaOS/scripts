@@ -27,7 +27,6 @@
 #variables
 GIT_MIRROR="/home/defora/git"
 GIT_REMOTE="origin"
-PREFIX="/usr/local"
 #executables
 GIT="/usr/bin/git"
 
