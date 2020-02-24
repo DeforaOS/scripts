@@ -28,6 +28,7 @@
 GIT_GITWEB="https://git.defora.org/gitweb"
 GIT_MIRROR="/home/defora/git"
 GIT_REMOTE="origin"
+HOOKS="mirror irc"
 IRC_CHANNEL="#DeforaOS"
 IRC_SERVER="irc.oftc.net"
 PREFIX="/usr/local"
@@ -90,9 +91,11 @@ while read line; do
 	echo "$line" >> "$tmpfile"
 done
 #chain the hooks
-_hook_mirror < "$tmpfile"
-_hook_irc < "$tmpfile"
+ret=0
+for hook in $HOOKS; do
+	"_hook_$hook" < "$tmpfile"				|| ret=2
+done
 #clean up
 $RM -- "$tmpfile"						|| exit 2
 
-exit 0
+exit $ret
