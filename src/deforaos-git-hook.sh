@@ -25,12 +25,12 @@
 
 
 #variables
+PREFIX="/usr/local"
 GIT_GITWEB="https://git.defora.org/gitweb"
 HOOKS="irc jobs"
 IRC_CHANNEL="#DeforaOS"
 IRC_SERVER="irc.oftc.net"
 JOBS_BRANCH_MASTER="$PREFIX/deforaos-git-mirror.sh"
-PREFIX="/usr/local"
 #executables
 GIT="/usr/bin/git"
 GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message.sh"
