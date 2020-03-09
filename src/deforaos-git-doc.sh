@@ -25,8 +25,11 @@
 
 
 #variables
+PREFIX="/usr/local"
 GIT_BRANCH="master"
 GIT_REMOTE="https://git.defora.org"
+DATADIR="$PREFIX/share"
+MIRROR="doc:doc"
 PROGNAME_GIT_DOC="deforaos-git-doc.sh"
 #executables
 CONFIGURE="/usr/local/bin/configure"
@@ -35,6 +38,7 @@ GIT_CLONE="$GIT clone -q"
 MAKE="make"
 MKTEMP="mktemp"
 RM="/bin/rm -f"
+RSYNC="rsync -a"
 
 
 #functions
@@ -60,6 +64,11 @@ _git_tests()
 			$CONFIGURE &&
 			cd doc &&
 			$MAKE DESTDIR="$tmpdir/destdir" install)|| ret=2
+		#upload the documentation if relevant
+		if [ $ret -eq 0 -a -d "$tmpdir/destdir$DATADIR/gtk-doc" ]; then
+			$RSYNC "$tmpdir/destdir$DATADIR/gtk-doc" "$MIRROR" \
+								|| ret=2
+		fi
 	fi
 	#cleanup
 	$RM -r "$tmpdir"
