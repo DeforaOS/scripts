@@ -27,8 +27,12 @@
 #variables
 GIT_MIRROR="/home/defora/git"
 GIT_REMOTE="origin"
+PROGNAME_GIT_MIRROR="deforaos-git-mirror.sh"
 #executables
 GIT="/usr/bin/git"
+GIT_CLONE="$GIT clone -q"
+GIT_FETCH="$GIT fetch -q"
+GIT_RESET="$GIT reset -q"
 
 
 #functions
@@ -40,7 +44,7 @@ _git_mirror()
 
 	if [ ! -d "$mirror" ]; then
 		#clone the repository
-		$GIT clone "$HOME/repositories/${repository}.git" "$mirror"
+		$GIT_CLONE "$HOME/repositories/${repository}.git" "$mirror"
 		if [ $? -ne 0 ]; then
 			echo "$repository: Could not create mirror" 1>&2
 			continue
@@ -48,8 +52,16 @@ _git_mirror()
 	fi
 	#mirror the repository
 	(cd "$mirror" &&
-		$GIT fetch -q "$GIT_REMOTE" &&
-		$GIT reset -q --hard "$GIT_REMOTE/$branch")	|| return 2
+		$GIT_FETCH "$GIT_REMOTE" &&
+		$GIT_RESET --hard "$GIT_REMOTE/$branch")	|| return 2
+}
+
+
+#usage
+_usage()
+{
+	echo "Usage: $PROGNAME_GIT_MIRROR repository" 1>&2
+	return 1
 }
 
 
