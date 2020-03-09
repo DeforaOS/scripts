@@ -284,7 +284,6 @@ _package_guess_scm()
 		echo "cvs"
 	elif [ -d ".git" ]; then
 		#git
-		#FIXME also look in parent folders
 		echo "git"
 	else
 		return 2
