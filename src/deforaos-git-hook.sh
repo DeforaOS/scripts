@@ -38,7 +38,7 @@ GIT="/usr/bin/git"
 GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message.sh"
 IRC="$PREFIX/libexec/deforaos-irc.sh -N -s $IRC_SERVER -c $IRC_CHANNEL -n defora"
 JOBS="$PREFIX/bin/deforaos-jobs.sh -d /home/jobs/DeforaOS"
-MKTEMP="/bin/mktemp"
+MKTEMP="mktemp"
 RM="/bin/rm -f"
 
 
