@@ -51,14 +51,15 @@ _git_tests()
 	fi
 	#clone the repository
 	$GIT_CLONE --single-branch -b "$GIT_BRANCH" \
-		"$GIT_REMOTE/${repository}.git" "$tmpdir"
+		"$GIT_REMOTE/${repository}.git" "$tmpdir/repository"
 	if [ $? -ne 0 ]; then
 		echo "$repository: Could not clone" 1>&2
-	else
-		#build the documentation if available
-		if [ -d "$tmpdir/doc" ]; then
-			(cd "$tmpdir/doc" && $CONFIGURE .. && $MAKE)|| ret=2
-		fi
+	elif [ -d "$tmpdir/repository/doc" ]; then
+		#generate documentation if available
+		(cd "$tmpdir/repository" &&
+			$CONFIGURE &&
+			cd doc &&
+			$MAKE DESTDIR="$tmpdir/destdir" install)|| ret=2
 	fi
 	#cleanup
 	$RM -r "$tmpdir"
