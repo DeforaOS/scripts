@@ -18,6 +18,7 @@
 
 #environment
 #variables
+DEVNULL="/dev/null"
 JOIN="/j"
 NOTICE="/NOTICE"
 PREFIX="/var/tmp/ii"
@@ -55,7 +56,7 @@ _irc()
 	#connect to the server
 	if [ ! -w "$serverin" ]; then
 		_info "$server: Connecting to server"
-		$II -s "$server" -p "$port" -n "$nickname" &
+		$II -s "$server" -p "$port" -n "$nickname" > "$DEVNULL" &
 		pid=$!
 	fi
 	#wait until the server is connected to
