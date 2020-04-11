@@ -63,8 +63,8 @@ _git_tests()
 		#update submodules if any
 		[ -f "$tmpdir/repository/.gitmodules" ] &&
 			(cd "$tmpdir/repository" &&
-			$GIT submodule init &&
-			$GIT submodule update)
+			$GIT_SUBMODULE init &&
+			$GIT_SUBMODULE update)
 		#generate documentation if available
 		(cd "$tmpdir/repository" &&
 			$CONFIGURE &&

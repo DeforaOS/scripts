@@ -32,6 +32,7 @@ PROGNAME_GIT_TESTS="deforaos-git-tests.sh"
 CONFIGURE="/usr/local/bin/configure"
 GIT="git"
 GIT_CLONE="$GIT clone -q"
+GIT_SUBMODULE="$GIT submodule -q"
 MAKE="make"
 MKTEMP="mktemp"
 RM="/bin/rm -f"
@@ -54,11 +55,14 @@ _git_tests()
 		"$GIT_REMOTE/${repository}.git" "$tmpdir"
 	if [ $? -ne 0 ]; then
 		echo "$repository: Could not clone" 1>&2
-	else
+	elif [ -d "$tmpdir/tests" ]; then
+		#update submodules if any
+		[ -f "$tmpdir/repository/.gitmodules" ] &&
+			(cd "$tmpdir/repository" &&
+			$GIT submodule init &&
+			$GIT submodule update)
 		#run tests if available
-		if [ -d "$tmpdir/tests" ]; then
-			(cd "$tmpdir" && $CONFIGURE && $MAKE tests)|| ret=2
-		fi
+		(cd "$tmpdir" && $CONFIGURE && $MAKE tests)	|| ret=2
 	fi
 	#cleanup
 	$RM -r "$tmpdir"
