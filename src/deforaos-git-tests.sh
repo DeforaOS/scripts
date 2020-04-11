@@ -30,7 +30,7 @@ GIT_REMOTE="https://git.defora.org"
 PROGNAME_GIT_TESTS="deforaos-git-tests.sh"
 #executables
 CONFIGURE="/usr/local/bin/configure"
-GIT="/usr/bin/git"
+GIT="git"
 GIT_CLONE="$GIT clone -q"
 MAKE="make"
 MKTEMP="mktemp"

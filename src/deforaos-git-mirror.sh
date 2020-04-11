@@ -29,7 +29,7 @@ GIT_MIRROR="/home/defora/git"
 GIT_REMOTE="origin"
 PROGNAME_GIT_MIRROR="deforaos-git-mirror.sh"
 #executables
-GIT="/usr/bin/git"
+GIT="git"
 GIT_CLONE="$GIT clone -q"
 GIT_FETCH="$GIT fetch -q"
 GIT_RESET="$GIT reset -q"

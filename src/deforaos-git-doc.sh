@@ -33,7 +33,7 @@ MIRROR="doc:doc"
 PROGNAME_GIT_DOC="deforaos-git-doc.sh"
 #executables
 CONFIGURE="/usr/local/bin/configure"
-GIT="/usr/bin/git"
+GIT="git"
 GIT_CLONE="$GIT clone -q"
 MAKE="make"
 MKTEMP="mktemp"
