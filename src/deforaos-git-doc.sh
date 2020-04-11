@@ -35,6 +35,7 @@ PROGNAME_GIT_DOC="deforaos-git-doc.sh"
 CONFIGURE="/usr/local/bin/configure"
 GIT="git"
 GIT_CLONE="$GIT clone -q"
+GIT_SUBMODULE="$GIT submodule -q"
 MAKE="make"
 MKTEMP="mktemp"
 RM="/bin/rm -f"
@@ -59,6 +60,11 @@ _git_tests()
 	if [ $? -ne 0 ]; then
 		echo "$repository: Could not clone" 1>&2
 	elif [ -d "$tmpdir/repository/doc" ]; then
+		#update submodules if any
+		[ -f "$tmpdir/repository/.gitmodules" ] &&
+			(cd "$tmpdir/repository" &&
+			$GIT submodule init &&
+			$GIT submodule update)
 		#generate documentation if available
 		(cd "$tmpdir/repository" &&
 			$CONFIGURE &&
