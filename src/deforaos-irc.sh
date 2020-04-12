@@ -32,7 +32,7 @@ HEAD="head"
 II="ii -i $PREFIX"
 KILL="kill"
 RM="rm -f"
-SLEEP="sleep 2"
+SLEEP="sleep 1"
 TR="tr"
 
 
@@ -64,7 +64,7 @@ _irc()
 	while [ ! -w "$serverin" ]; do
 		$SLEEP
 		loop=$((loop + 1))
-		if [ $loop -ge 10 ]; then
+		if [ $loop -ge 30 ]; then
 			ret=2
 			break
 		fi
@@ -94,7 +94,7 @@ _irc()
 		while [ ! -w "$channelin" ]; do
 			$SLEEP
 			loop=$((loop + 1))
-			if [ $loop -ge 10 ]; then
+			if [ $loop -ge 30 ]; then
 				ret=3
 				break
 			fi
@@ -129,7 +129,7 @@ _irc()
 		while [ ! -w "$channelin" ]; do
 			$SLEEP
 			loop=$((loop + 1))
-			if [ $loop -ge 10 ]; then
+			if [ $loop -ge 30 ]; then
 				ret=4
 				break
 			fi
