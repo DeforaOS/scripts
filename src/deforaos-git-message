@@ -235,7 +235,7 @@ _usage()
 	if [ $# -gt 0 ]; then
 		echo "Usage: $PROGNAME $@" 1>&2
 	else
-		echo "Usage: $PROGNAME [-O name=value...] hook [argument...]" 1>&2
+		echo "Usage: $PROGNAME hook [argument...]" 1>&2
 	fi
 	return 1
 }
