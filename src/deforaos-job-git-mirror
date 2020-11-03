@@ -27,22 +27,16 @@
 
 
 #variables
-PREFIX="/usr/local"
 #executables
-CONFIGURE="configure"
 GIT="git"
 GIT_CLONE="$GIT clone -q"
-GIT_SUBMODULE="$GIT submodule -q"
-MAKE="make"
-MKTEMP="mktemp"
-RM="/bin/rm -f"
-RSYNC="rsync -a"
+GIT_FETCH="$GIT fetch -q"
+GIT_RESET="$GIT reset -q"
+GIT_MIRROR=
+GIT_REMOTE="origin"
 #settings
-DATADIR="$PREFIX/share"
-GIT_BRANCH="master"
-GIT_REMOTE=
-MIRROR="doc:doc"
-PROGNAME="deforaos-git-doc"
+PREFIX="/usr/local"
+PROGNAME="deforaos-job-git-mirror"
 SYSCONFDIR="$PREFIX/etc"
 #load local settings
 [ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
@@ -52,42 +46,24 @@ SYSCONFDIR="$PREFIX/etc"
 
 
 #functions
-#git_tests
-_git_tests()
+#git_mirror
+_git_mirror()
 {
-	ret=0
 	repository="$1"
+	mirror="$GIT_MIRROR${repository}.git"
 
-	#create a temporary directory
-	tmpdir=$($MKTEMP -d)
-	if [ $? -ne 0 ]; then
-		return 2
-	fi
-	#clone the repository
-	$GIT_CLONE --single-branch -b "$GIT_BRANCH" \
-		"$GIT_REMOTE${repository}.git" "$tmpdir/repository"
-	if [ $? -ne 0 ]; then
-		echo "$repository: Could not clone" 1>&2
-	elif [ -d "$tmpdir/repository/doc" ]; then
-		#update submodules if any
-		[ -f "$tmpdir/repository/.gitmodules" ] &&
-			(cd "$tmpdir/repository" &&
-			$GIT_SUBMODULE init &&
-			$GIT_SUBMODULE update)
-		#generate documentation if available
-		(cd "$tmpdir/repository" &&
-			$CONFIGURE &&
-			cd doc &&
-			$MAKE DESTDIR="$tmpdir/destdir" install)|| ret=2
-		#upload the documentation if relevant
-		if [ $ret -eq 0 -a -d "$tmpdir/destdir$DATADIR/gtk-doc" ]; then
-			$RSYNC "$tmpdir/destdir$DATADIR/gtk-doc" "$MIRROR" \
-								|| ret=2
+	if [ ! -d "$mirror" ]; then
+		#clone the repository
+		$GIT_CLONE "$HOME/repositories/${repository}.git" "$mirror"
+		if [ $? -ne 0 ]; then
+			echo "$repository: Could not create mirror" 1>&2
+			continue
 		fi
 	fi
-	#cleanup
-	$RM -r "$tmpdir"
-	return $ret
+	#mirror the repository
+	(cd "$mirror" &&
+		$GIT_FETCH "$GIT_REMOTE" &&
+		$GIT_RESET --hard "$GIT_REMOTE/$branch")	|| return 2
 }
 
 
@@ -116,4 +92,4 @@ if [ $# -ne 1 ]; then
 	_usage
 	exit $?
 fi
-_git_tests "$1"
+_git_mirror "$1"

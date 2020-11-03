@@ -27,6 +27,7 @@
 
 
 #variables
+PREFIX="/usr/local"
 #executables
 CONFIGURE="configure"
 GIT="git"
@@ -34,12 +35,14 @@ GIT_CLONE="$GIT clone -q"
 GIT_SUBMODULE="$GIT submodule -q"
 MAKE="make"
 MKTEMP="mktemp"
-RM="rm -f"
+RM="/bin/rm -f"
+RSYNC="rsync -a"
 #settings
+DATADIR="$PREFIX/share"
 GIT_BRANCH="master"
 GIT_REMOTE=
-PREFIX="/usr/local"
-PROGNAME="deforaos-git-tests"
+MIRROR="doc:doc"
+PROGNAME="deforaos-job-git-doc"
 SYSCONFDIR="$PREFIX/etc"
 #load local settings
 [ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
@@ -62,17 +65,25 @@ _git_tests()
 	fi
 	#clone the repository
 	$GIT_CLONE --single-branch -b "$GIT_BRANCH" \
-		"$GIT_REMOTE${repository}.git" "$tmpdir"
+		"$GIT_REMOTE${repository}.git" "$tmpdir/repository"
 	if [ $? -ne 0 ]; then
 		echo "$repository: Could not clone" 1>&2
-	elif [ -d "$tmpdir/tests" ]; then
+	elif [ -d "$tmpdir/repository/doc" ]; then
 		#update submodules if any
 		[ -f "$tmpdir/repository/.gitmodules" ] &&
 			(cd "$tmpdir/repository" &&
 			$GIT_SUBMODULE init &&
 			$GIT_SUBMODULE update)
-		#run tests if available
-		(cd "$tmpdir" && $CONFIGURE && $MAKE tests)	|| ret=2
+		#generate documentation if available
+		(cd "$tmpdir/repository" &&
+			$CONFIGURE &&
+			cd doc &&
+			$MAKE DESTDIR="$tmpdir/destdir" install)|| ret=2
+		#upload the documentation if relevant
+		if [ $ret -eq 0 -a -d "$tmpdir/destdir$DATADIR/gtk-doc" ]; then
+			$RSYNC "$tmpdir/destdir$DATADIR/gtk-doc" "$MIRROR" \
+								|| ret=2
+		fi
 	fi
 	#cleanup
 	$RM -r "$tmpdir"

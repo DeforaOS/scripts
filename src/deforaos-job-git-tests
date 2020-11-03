@@ -28,15 +28,18 @@
 
 #variables
 #executables
+CONFIGURE="configure"
 GIT="git"
 GIT_CLONE="$GIT clone -q"
-GIT_FETCH="$GIT fetch -q"
-GIT_RESET="$GIT reset -q"
-GIT_MIRROR=
-GIT_REMOTE="origin"
+GIT_SUBMODULE="$GIT submodule -q"
+MAKE="make"
+MKTEMP="mktemp"
+RM="rm -f"
 #settings
+GIT_BRANCH="master"
+GIT_REMOTE=
 PREFIX="/usr/local"
-PROGNAME="deforaos-git-mirror"
+PROGNAME="deforaos-job-git-tests"
 SYSCONFDIR="$PREFIX/etc"
 #load local settings
 [ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
@@ -46,24 +49,34 @@ SYSCONFDIR="$PREFIX/etc"
 
 
 #functions
-#git_mirror
-_git_mirror()
+#git_tests
+_git_tests()
 {
+	ret=0
 	repository="$1"
-	mirror="$GIT_MIRROR${repository}.git"
 
-	if [ ! -d "$mirror" ]; then
-		#clone the repository
-		$GIT_CLONE "$HOME/repositories/${repository}.git" "$mirror"
-		if [ $? -ne 0 ]; then
-			echo "$repository: Could not create mirror" 1>&2
-			continue
-		fi
+	#create a temporary directory
+	tmpdir=$($MKTEMP -d)
+	if [ $? -ne 0 ]; then
+		return 2
 	fi
-	#mirror the repository
-	(cd "$mirror" &&
-		$GIT_FETCH "$GIT_REMOTE" &&
-		$GIT_RESET --hard "$GIT_REMOTE/$branch")	|| return 2
+	#clone the repository
+	$GIT_CLONE --single-branch -b "$GIT_BRANCH" \
+		"$GIT_REMOTE${repository}.git" "$tmpdir"
+	if [ $? -ne 0 ]; then
+		echo "$repository: Could not clone" 1>&2
+	elif [ -d "$tmpdir/tests" ]; then
+		#update submodules if any
+		[ -f "$tmpdir/repository/.gitmodules" ] &&
+			(cd "$tmpdir/repository" &&
+			$GIT_SUBMODULE init &&
+			$GIT_SUBMODULE update)
+		#run tests if available
+		(cd "$tmpdir" && $CONFIGURE && $MAKE tests)	|| ret=2
+	fi
+	#cleanup
+	$RM -r "$tmpdir"
+	return $ret
 }
 
 
@@ -92,4 +105,4 @@ if [ $# -ne 1 ]; then
 	_usage
 	exit $?
 fi
-_git_mirror "$1"
+_git_tests "$1"
