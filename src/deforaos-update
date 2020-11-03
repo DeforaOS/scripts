@@ -24,7 +24,7 @@ DESTDIR="/var/www"
 DEVNULL="/dev/null"
 EMAIL="devel@lists.defora.org"
 HOMEPAGE="https://www.defora.org"
-PROGNAME="deforaos-update.sh"
+PROGNAME="deforaos-update"
 ROOT=
 SRC=
 
