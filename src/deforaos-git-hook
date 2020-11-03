@@ -34,7 +34,6 @@ JOBS_BRANCH_MASTER="$PREFIX/libexec/deforaos-git-mirror.sh
 $PREFIX/libexec/deforaos-git-doc.sh
 $PREFIX/libexec/deforaos-git-tests.sh"
 #executables
-GIT="/usr/bin/git"
 GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message"
 IRC="$PREFIX/libexec/deforaos-irc.sh -N -s $IRC_SERVER -c $IRC_CHANNEL -n defora"
 JOBS="$PREFIX/bin/deforaos-jobs.sh -d /home/jobs/DeforaOS"
