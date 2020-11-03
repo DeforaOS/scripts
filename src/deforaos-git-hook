@@ -31,7 +31,7 @@ PREFIX="/usr/local"
 #executables
 GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message"
 DEFORAOS_IRC="$PREFIX/libexec/deforaos-irc -N -n defora"
-DEFORAOS_JOBS="$PREFIX/bin/deforaos-jobs -d /home/jobs/DeforaOS"
+DEFORAOS_JOBS="$PREFIX/bin/deforaos-jobs"
 MKTEMP="mktemp"
 RM="rm -f"
 #settings
