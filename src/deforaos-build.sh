@@ -39,6 +39,7 @@ KERNEL_VERSION="2.4.37.7"
 KERNEL_PATH="/usr/src/linux-$KERNEL_VERSION"
 MODULE="DeforaOS"
 PREFIX="/usr"
+PROGNAME="deforaos-build.sh"
 SYSTEM="$(uname -s)"
 SRC="$HOME/build/$SYSTEM-$ARCH"
 DST="$HOME/destdir/$SYSTEM-$ARCH"
@@ -127,7 +128,7 @@ _deforaos_build()
 #usage
 _usage()
 {
-	echo "Usage: deforaos-build.sh [-O name=value...]" 1>&2
+	echo "Usage: $PROGNAME [-O name=value...]" 1>&2
 	return 1
 }
 
