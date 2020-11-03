@@ -17,18 +17,6 @@
 
 
 #environment
-DEBUG=
-DEVNULL="/dev/null"
-DRYRUN=0
-FORCE=0
-GIT_BRANCH="master"
-HOMEPAGE="https://www.defora.org"
-PACKAGE=
-PROGNAME="deforaos-release"
-PROJECTCONF="project.conf"
-VENDOR="deforaos"
-VERBOSE=0
-VERSION=
 #executables
 CONFIGURE="configure"
 CVS="cvs"
@@ -39,6 +27,30 @@ RM="rm -f"
 TAR="tar"
 TR="tr"
 WC="wc"
+#settings
+DEBUG=
+DEVNULL="/dev/null"
+DESKTOPEXT=".desktop"
+DISTEXT=".tar.gz"
+DRYRUN=0
+FORCE=0
+GIT_BRANCH="master"
+HOMEPAGE="https://www.defora.org"
+PACKAGE=
+POEXT=".po"
+POTEXT=".pot"
+PREFIX="/usr/local"
+PROGNAME="deforaos-release"
+PROJECTCONF="project.conf"
+SYSCONFDIR="$PREFIX/etc"
+VENDOR="deforaos"
+VERBOSE=0
+VERSION=
+#load local settings
+[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
+[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
+	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
 
 
 #functions
@@ -76,7 +88,7 @@ _deforaos_release()
 	fi
 
 	#checking the desktop files
-	for i in data/*.desktop; do
+	for i in data/*$DESKTOPEXT; do
 		[ ! -e "$i" ] && break
 		basename="${i#data/}"
 		if [ "$basename" = "${basename#$VENDOR-}" ]; then
@@ -85,11 +97,11 @@ _deforaos_release()
 		fi
 	done
 
-	if [ -f "po/$PACKAGE.pot" ]; then
+	if [ -f "po/$PACKAGE$POTEXT" ]; then
 		_info "Checking the translations..."
-		$RM -- "po/$PACKAGE.pot"			|| return 2
+		$RM -- "po/$PACKAGE$POTEXT"			|| return 2
 		(cd "po" && $MAKE)				|| return 2
-		$GREP -q "fuzzy" -- po/*.po
+		$GREP -q "fuzzy" -- po/*$POEXT
 		if [ $? -eq 0 ]; then
 			_error "Some translations are fuzzy"
 			return $?
@@ -109,7 +121,7 @@ _deforaos_release()
 
 	#create the archive
 	_info "Creating the archive..."
-	archive="$PACKAGE-$VERSION.tar.gz"
+	archive="$PACKAGE-$VERSION$DISTEXT"
 	target="distcheck"
 	[ $FORCE -ne 0 ] && target="dist"
 	$DEBUG $MAKE "$target"
@@ -256,7 +268,7 @@ _info()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-Dfnv][-O name=value...] version" 1>&2
+	echo "Usage: $PROGNAME [-Dfnv] version" 1>&2
 	echo "  -D	Run in debugging mode" 1>&2
 	echo "  -f	Do not perform tests" 1>&2
 	echo "  -n	Do not actually publish changes (dry-run)" 1>&2
