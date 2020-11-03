@@ -26,7 +26,7 @@
 
 #variables
 PREFIX="/usr/local"
-GIT_GITWEB="https://git.defora.org/gitweb"
+GITWEB_URL="https://git.defora.org/gitweb"
 HOOKS="irc jobs"
 IRC_CHANNEL="#DeforaOS"
 IRC_SERVER="irc.oftc.net"
@@ -35,7 +35,7 @@ $PREFIX/libexec/deforaos-git-doc.sh
 $PREFIX/libexec/deforaos-git-tests.sh"
 #executables
 GIT="/usr/bin/git"
-GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message.sh"
+GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message"
 IRC="$PREFIX/libexec/deforaos-irc.sh -N -s $IRC_SERVER -c $IRC_CHANNEL -n defora"
 JOBS="$PREFIX/bin/deforaos-jobs.sh -d /home/jobs/DeforaOS"
 MKTEMP="mktemp"
@@ -72,7 +72,7 @@ _jobs_branch()
 #hook_irc
 _hook_irc()
 {
-	$GIT_MESSAGE -O GITWEB="$GIT_GITWEB" "post-receive" | $IRC
+	$GIT_MESSAGE -O GITWEB_URL="$GITWEB_URL" "post-receive" | $IRC
 	#ignore errors
 	return 0
 }
