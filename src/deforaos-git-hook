@@ -39,6 +39,7 @@ IRC_SERVER=
 JOBS_BRANCH_MASTER="$PREFIX/libexec/deforaos-git-mirror.sh
 $PREFIX/libexec/deforaos-git-doc.sh
 $PREFIX/libexec/deforaos-git-tests.sh"
+PROGNAME="deforaos-git-hook"
 SYSCONFDIR="$PREFIX/etc"
 #load local settings
 [ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
