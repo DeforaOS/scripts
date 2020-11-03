@@ -27,17 +27,24 @@
 
 
 #variables
-PROGNAME="deforaos-lock"
 #executables
 LOCK="mkdir"
 UNLOCK="rmdir"
+#settings
+PROGNAME="deforaos-lock"
+SYSCONFDIR="$PREFIX/etc"
+#load local settings
+[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
+[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
+	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
 
 
 #functions
 #lock
 _lock()
 {
-	lockfile="/var/tmp/deforaos-lock.$1"
+	lockfile="/var/tmp/$PROGNAME.$1"
 
 	$LOCK -- "$lockfile"					|| return 2
 	"$@"
