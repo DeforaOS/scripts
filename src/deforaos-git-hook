@@ -26,19 +26,25 @@
 
 #variables
 PREFIX="/usr/local"
-GITWEB_URL="https://git.defora.org/gitweb"
+#executables
+GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message"
+DEFORAOS_IRC="$PREFIX/libexec/deforaos-irc -N -n defora"
+DEFORAOS_JOBS="$PREFIX/bin/deforaos-jobs -d /home/jobs/DeforaOS"
+MKTEMP="mktemp"
+RM="rm -f"
+#settings
 HOOKS="irc jobs"
-IRC_CHANNEL="#DeforaOS"
-IRC_SERVER="irc.oftc.net"
+IRC_CHANNEL=
+IRC_SERVER=
 JOBS_BRANCH_MASTER="$PREFIX/libexec/deforaos-git-mirror.sh
 $PREFIX/libexec/deforaos-git-doc.sh
 $PREFIX/libexec/deforaos-git-tests.sh"
-#executables
-GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message"
-IRC="$PREFIX/libexec/deforaos-irc.sh -N -s $IRC_SERVER -c $IRC_CHANNEL -n defora"
-JOBS="$PREFIX/bin/deforaos-jobs.sh -d /home/jobs/DeforaOS"
-MKTEMP="mktemp"
-RM="/bin/rm -f"
+SYSCONFDIR="$PREFIX/etc"
+#load local settings
+[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
+[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
+	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
 
 
 #functions
@@ -62,7 +68,7 @@ _jobs_branch()
 
 	if [ "$branch" = "master" -a -n "$JOBS_BRANCH_MASTER" ]; then
 		for job in $JOBS_BRANCH_MASTER; do
-			$JOBS add "$job $repository"
+			$DEFORAOS_JOBS add "$job $repository"
 		done
 	fi
 }
@@ -71,7 +77,11 @@ _jobs_branch()
 #hook_irc
 _hook_irc()
 {
-	$GIT_MESSAGE -O GITWEB_URL="$GITWEB_URL" "post-receive" | $IRC
+	if [ -z "$IRC_SERVER" -o -z "$IRC_CHANNEL" ]; then
+		_error "IRC_SERVER and IRC_CHANNEL must be set for the IRC hook"
+		return $?
+	fi
+	$GIT_MESSAGE "post-receive" | $DEFORAOS_IRC "$IRC_SERVER" "$IRC_CHANNEL"
 	#ignore errors
 	return 0
 }

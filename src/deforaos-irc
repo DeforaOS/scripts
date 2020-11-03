@@ -16,42 +16,47 @@
 
 
 
-#environment
 #variables
-DEVNULL="/dev/null"
-JOIN="/j"
-NOTICE="/NOTICE"
-PREFIX="/var/tmp/ii"
-PRIVMSG="/j"
-PROGNAME="deforaos-irc.sh"
-QUIT="/QUIT"
 #executables
 CUT="cut"
 FORTUNE="fortune -s"
 HEAD="head"
-II="ii -i $PREFIX"
+II=
 KILL="kill"
 RM="rm -f"
 SLEEP="sleep 1"
+TOLOWER="_tolower"
 TR="tr"
+#settings
+DEVNULL="/dev/null"
+II_CMD_JOIN="/j"
+II_CMD_NOTICE="/II_CMD_NOTICE"
+II_CMD_PRIVMSG="/j"
+II_CMD_QUIT="/II_CMD_QUIT"
+II_PREFIX="/var/tmp/ii"
+PREFIX="/usr/local"
+PROGNAME="deforaos-irc"
+SYSCONFDIR="$PREFIX/etc"
+VERBOSE=0
+#load local settings
+[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
+[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
+	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
 
 
 #functions
 #irc
 _irc()
 {
-	if [ $# -ne 4 ]; then
-		_usage
-		return 1
-	fi
 	ret=0
 	pid=0
-	server=$(echo "$1" | $TR A-Z a-z)
+	server=$(echo "$1" | $TOLOWER)
 	port="$2"
 	nickname="$3"
-	channel=$(echo "$4" | $TR A-Z a-z)
-	serverin="$PREFIX/$server/in"
-	channelin="$PREFIX/$server/$channel/in"
+	channel=$(echo "$4" | $TOLOWER)
+	serverin="$II_PREFIX/$server/in"
+	channelin="$II_PREFIX/$server/$channel/in"
 
 	#connect to the server
 	if [ ! -w "$serverin" ]; then
@@ -75,10 +80,10 @@ _irc()
 		while read line; do
 			if [ $notice -eq 0 ]; then
 				_info "$server: Messaging user $channel"
-				output="$PRIVMSG $channel $line"
+				output="$II_CMD_PRIVMSG $channel $line"
 			else
 				_info "$server: Notifying user $channel"
-				output="$NOTICE $channel :$line"
+				output="$II_CMD_NOTICE $channel :$line"
 			fi
 			echo "$output"
 			$SLEEP
@@ -87,7 +92,7 @@ _irc()
 		#join the channel
 		if [ ! -w "$channelin" ]; then
 			_info "$server: Joining channel $channel"
-			echo "$JOIN $channel" > "$serverin"
+			echo "$II_CMD_JOIN $channel" > "$serverin"
 		fi
 		#wait until the channel is joined
 		loop=0
@@ -110,7 +115,7 @@ _irc()
 			else
 				_info "$server: Notifying channel $channel"
 				while read line; do
-					echo "$NOTICE $channel :$line"
+					echo "$II_CMD_NOTICE $channel :$line"
 					$SLEEP
 				done > "$serverin"
 			fi
@@ -122,7 +127,7 @@ _irc()
 		#quit the server
 		_info "$server: Disconnecting from server"
 		fortune=$($FORTUNE | $HEAD -n 1 | $CUT -c 1-50)
-		echo "$QUIT :$fortune" > "$serverin"
+		echo "$II_CMD_QUIT :$fortune" > "$serverin"
 		#wait until the server is disconnected
 		#FIXME ii does not automatically clean up when quitting
 		loop=0
@@ -153,14 +158,21 @@ _error()
 #info
 _info()
 {
-	[ $verbose -eq 0 ] || echo "$PROGNAME: $@"
+	[ $VERBOSE -eq 0 ] || echo "$PROGNAME: $@"
+}
+
+
+#tolower
+_tolower()
+{
+	$TR A-Z a-z
 }
 
 
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-Nqv] -s server -c channel [-n nickname]" 1>&2
+	echo "Usage: $PROGNAME [-Nqv][-n nickname] server channel" 1>&2
 	echo "  -N	Use notice" 1>&2
 	echo "  -q	Quiet mode (default)" 1>&2
 	echo "  -v	Be more verbose" 1>&2
@@ -170,34 +182,28 @@ _usage()
 
 #main
 #parse options
-channel=
 nickname="$USER"
 notice=0
 port=6667
-server=
-verbose=0
-while getopts "c:Nn:qs:v" name; do
+while getopts "Nn:O:qv" name; do
 	case "$name" in
-		c)
-			channel="$OPTARG"
-			;;
 		N)
 			notice=1
 			;;
 		n)
 			nickname="$OPTARG"
 			;;
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
 		p)
 			port="$OPTARG"
 			;;
 		q)
-			verbose=0
-			;;
-		s)
-			server="$OPTARG"
+			VERBOSE=0
 			;;
 		v)
-			verbose=$((verbose + 1))
+			VERBOSE=$((VERBOSE + 1))
 			;;
 		*)
 			_usage
@@ -205,9 +211,18 @@ while getopts "c:Nn:qs:v" name; do
 			;;
 	esac
 done
+shift $((OPTIND - 1))
+if [ $# -ne 2 ]; then
+	_usage
+	exit $?
+fi
+server="$1"
+channel="$2"
 if [ -z "$server" -o -z "$channel" ]; then
 	_usage
 	exit $?
 fi
+
+[ -n "$II" ] || II="ii -i $II_PREFIX"
 
 _irc "$server" "$port" "$nickname" "$channel"

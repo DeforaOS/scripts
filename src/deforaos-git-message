@@ -16,17 +16,25 @@
 
 
 
-#environment
 #variables
-GITWEB=
-PROGNAME="deforaos-git-message.sh"
-REDMINE=
 #executables
 GIT="git"
 SED="sed"
 SORT="sort"
+TOLOWER="_tolower"
 TR="tr"
 UNIQ="uniq"
+#settings
+GITWEB_URL=
+PREFIX="/usr/local"
+PROGNAME="deforaos-git-message"
+REDMINE_URL=
+SYSCONFDIR="$PREFIX/etc"
+#load local settings
+[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
+[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
+	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
 
 
 #functions
@@ -56,8 +64,8 @@ _link_branch()
 	repository="$1"
 	branch="$2"
 
-	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=shortlog;h=refs/heads/$branch"
-	[ -n "$REDMINE" ] && echo "$REDMINE/repository/${repository}/show?rev=$branch" | _tolower
+	[ -n "$GITWEB_URL" ] && echo "$GITWEB_URL?p=${repository}.git;a=shortlog;h=refs/heads/$branch"
+	[ -n "$REDMINE_URL" ] && echo "$REDMINE_URL/repository/${repository}/show?rev=$branch" | $TOLOWER
 }
 
 
@@ -68,8 +76,8 @@ _link_commit()
 	rev="$2"
 	shortrev=$(_shorten 8 "$rev")
 
-	[ -n "$GITWEB" ] && echo "$GITWEB?p=${repository}.git;a=commit;h=$shortrev"
-	[ -n "$REDMINE" ] && echo "$REDMINE/repository/${repository}/revisions/$shortrev" | _tolower
+	[ -n "$GITWEB_URL" ] && echo "$GITWEB_URL?p=${repository}.git;a=commit;h=$shortrev"
+	[ -n "$REDMINE_URL" ] && echo "$REDMINE_URL/repository/${repository}/revisions/$shortrev" | $TOLOWER
 }
 
 
@@ -197,17 +205,17 @@ _message_update()
 }
 
 
-#_tolower
-_tolower()
-{
-	$TR A-Z a-z
-}
-
-
 #shorten
 _shorten()
 {
 	echo "$2" | $SED -e "s/^\\(.\\{$1\\}\\).*\$/\\1/"
+}
+
+
+#tolower
+_tolower()
+{
+	$TR A-Z a-z
 }
 
 
