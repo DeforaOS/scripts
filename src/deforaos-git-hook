@@ -54,27 +54,34 @@ SYSCONFDIR="$PREFIX/etc"
 #hook_jobs
 _hook_jobs()
 {
+	res=0
+
 	while read oldrev newrev refname; do
 		case "$refname" in
 			refs/heads/*)
-				_jobs_branch "${refname#refs/heads/}" "$GL_REPO"
+				_jobs_branch "${refname#refs/heads/}" \
+					"$GL_REPO"		|| res=2
 				;;
 		esac
 	done
-	return $ret
+	return $res
 }
 
 _jobs_branch()
-{
+{(
 	branch="$1"
 	repository="$2"
+	res=0
 
 	if [ "$branch" = "master" -a -n "$JOBS_BRANCH_MASTER" ]; then
 		for job in $JOBS_BRANCH_MASTER; do
-			$DEFORAOS_JOBS add "$job $repository"
+			#warn if the job is not available
+			[ -x "$job" ] || _error "$job: Job not available"
+			$DEFORAOS_JOBS add "$job $repository"	|| res=2
 		done
 	fi
-}
+	return $res
+)}
 
 
 #hook_irc
@@ -87,6 +94,14 @@ _hook_irc()
 	$GIT_MESSAGE "post-receive" | $DEFORAOS_IRC "$IRC_SERVER" "$IRC_CHANNEL"
 	#ignore errors
 	return 0
+}
+
+
+#error
+_error()
+{
+	echo "$PROGNAME: $@" 1>&2
+	return 2
 }
 
 
