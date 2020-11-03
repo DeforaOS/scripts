@@ -36,9 +36,9 @@ RM="rm -f"
 HOOKS="irc jobs"
 IRC_CHANNEL=
 IRC_SERVER=
-JOBS_BRANCH_MASTER="$PREFIX/libexec/deforaos-git-mirror.sh
-$PREFIX/libexec/deforaos-git-doc.sh
-$PREFIX/libexec/deforaos-git-tests.sh"
+JOBS_BRANCH_MASTER="$PREFIX/libexec/deforaos-git-mirror
+$PREFIX/libexec/deforaos-git-doc
+$PREFIX/libexec/deforaos-git-tests"
 PROGNAME="deforaos-git-hook"
 SYSCONFDIR="$PREFIX/etc"
 #load local settings

@@ -30,7 +30,7 @@ GIT_BRANCH="master"
 GIT_REMOTE="https://git.defora.org"
 DATADIR="$PREFIX/share"
 MIRROR="doc:doc"
-PROGNAME_GIT_DOC="deforaos-git-doc.sh"
+PROGNAME_GIT_DOC="deforaos-git-doc"
 #executables
 CONFIGURE="/usr/local/bin/configure"
 GIT="git"
