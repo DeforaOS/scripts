@@ -23,33 +23,41 @@
 #CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 #ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #POSSIBILITY OF SUCH DAMAGE.
-#Error codes:
-#  1	Usage error
-#  2	Generic error
-#  3	Could not lock the database
-#  4	Could not unlock the database
 
 
 
 #variables
-DATABASE_CONFFILE="deforaos-jobs.conf"
+PROGNAME="deforaos-jobs"
+#executables
+DATABASE="database"
+DEBUG=
+LOCK="mkdir"
+UNLOCK="rmdir"
+SED="sed"
+#settings
+DATABASE_CONFFILE="$PROGNAME.conf"
 DATABASE_ENGINE="sqlite3"
-DATABASE_FILE="deforaos-jobs.db"
-DATABASE_INITFILE="deforaos-jobs.sql"
+DATABASE_FILE="$PROGNAME.db"
+DATABASE_INITFILE="$PROGNAME.sql"
 DEVNULL="/dev/null"
 PREFIX="/usr/local"
-PROGNAME_JOBS="defora-jobs"
 QUERY_ADD_BEGIN="INSERT INTO jobs (command) VALUES ('"
 QUERY_ADD_END="')"
 QUERY_EXEC_SELECT="SELECT jobs_id, command FROM jobs WHERE started IS NULL ORDER BY jobs_id ASC LIMIT 1"
 QUERY_INIT="CREATE TABLE jobs (jobs_id INTEGER PRIMARY KEY, timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, command VARCHAR(255), started TIMESTAMP DEFAULT NULL, pid INTEGER DEFAULT NULL, code INTEGER DEFAULT NULL, completed TIMESTAMP DEFAULT NULL)"
 QUERY_LIST="SELECT * FROM jobs"
-#executables
-DATABASE="$PREFIX/bin/database"
-DEBUG=
-LOCK="mkdir"
-UNLOCK="rmdir"
-SED="sed"
+SYSCONFDIR="$PREFIX/etc"
+#load local settings
+[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
+[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
+	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
+
+#Error codes:
+#  1	Usage error
+#  2	Generic error
+#  3	Could not lock the database
+#  4	Could not unlock the database
 
 
 #functions
@@ -171,7 +179,7 @@ _debug()
 #error
 _error()
 {
-	echo "$PROGNAME_JOBS: $@" 1>&2
+	echo "$PROGNAME: $@" 1>&2
 	return 2
 }
 
@@ -179,9 +187,9 @@ _error()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME_JOBS [-d directory] add command" 1>&2
-	echo "       $PROGNAME_JOBS [-d directory] exec" 1>&2
-	echo "       $PROGNAME_JOBS [-d directory] list" 1>&2
+	echo "Usage: $PROGNAME [-d directory] add command" 1>&2
+	echo "       $PROGNAME [-d directory] exec" 1>&2
+	echo "       $PROGNAME [-d directory] list" 1>&2
 	return 1
 }
 
