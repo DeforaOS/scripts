@@ -27,17 +27,25 @@
 
 
 #variables
-GIT_BRANCH="master"
-GIT_REMOTE="https://git.defora.org"
-PROGNAME_GIT_TESTS="deforaos-git-tests.sh"
 #executables
-CONFIGURE="/usr/local/bin/configure"
+CONFIGURE="configure"
 GIT="git"
 GIT_CLONE="$GIT clone -q"
 GIT_SUBMODULE="$GIT submodule -q"
 MAKE="make"
 MKTEMP="mktemp"
-RM="/bin/rm -f"
+RM="rm -f"
+#settings
+GIT_BRANCH="master"
+GIT_REMOTE=
+PREFIX="/usr/local"
+PROGNAME="deforaos-git-tests"
+SYSCONFDIR="$PREFIX/etc"
+#load local settings
+[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
+[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
+	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
 
 
 #functions
@@ -54,15 +62,15 @@ _git_tests()
 	fi
 	#clone the repository
 	$GIT_CLONE --single-branch -b "$GIT_BRANCH" \
-		"$GIT_REMOTE/${repository}.git" "$tmpdir"
+		"$GIT_REMOTE${repository}.git" "$tmpdir"
 	if [ $? -ne 0 ]; then
 		echo "$repository: Could not clone" 1>&2
 	elif [ -d "$tmpdir/tests" ]; then
 		#update submodules if any
 		[ -f "$tmpdir/repository/.gitmodules" ] &&
 			(cd "$tmpdir/repository" &&
-			$GIT submodule init &&
-			$GIT submodule update)
+			$GIT_SUBMODULE init &&
+			$GIT_SUBMODULE update)
 		#run tests if available
 		(cd "$tmpdir" && $CONFIGURE && $MAKE tests)	|| ret=2
 	fi
@@ -75,12 +83,24 @@ _git_tests()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME_GIT_TESTS repository" 1>&2
+	echo "Usage: $PROGNAME repository" 1>&2
 	return 1
 }
 
 
 #main
+while getopts "O:" name; do
+	case "$name" in
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
+		*)
+			_usage
+			exit $?
+			;;
+	esac
+done
+shift $((OPTIND - 1))
 if [ $# -ne 1 ]; then
 	_usage
 	exit $?

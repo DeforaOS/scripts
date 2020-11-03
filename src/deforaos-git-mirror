@@ -27,14 +27,22 @@
 
 
 #variables
-GIT_MIRROR="/home/defora/git"
-GIT_REMOTE="origin"
-PROGNAME_GIT_MIRROR="deforaos-git-mirror.sh"
 #executables
 GIT="git"
 GIT_CLONE="$GIT clone -q"
 GIT_FETCH="$GIT fetch -q"
 GIT_RESET="$GIT reset -q"
+GIT_MIRROR=
+GIT_REMOTE="origin"
+#settings
+PREFIX="/usr/local"
+PROGNAME="deforaos-git-mirror"
+SYSCONFDIR="$PREFIX/etc"
+#load local settings
+[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
+[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
+	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
 
 
 #functions
@@ -42,7 +50,7 @@ GIT_RESET="$GIT reset -q"
 _git_mirror()
 {
 	repository="$1"
-	mirror="$GIT_MIRROR/${repository}.git"
+	mirror="$GIT_MIRROR${repository}.git"
 
 	if [ ! -d "$mirror" ]; then
 		#clone the repository
@@ -62,12 +70,24 @@ _git_mirror()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME_GIT_MIRROR repository" 1>&2
+	echo "Usage: $PROGNAME repository" 1>&2
 	return 1
 }
 
 
 #main
+while getopts "O:" name; do
+	case "$name" in
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
+		*)
+			_usage
+			exit $?
+			;;
+	esac
+done
+shift $((OPTIND - 1))
 if [ $# -ne 1 ]; then
 	_usage
 	exit $?
