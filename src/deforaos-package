@@ -27,30 +27,15 @@
 
 
 #environment
-DEBUG=
-DEVNULL="/dev/null"
-DOMAIN="defora.org"
-EMAIL=
-FORCE=0
-FULLNAME=
-HOMEPAGE="https://www.$DOMAIN"
-ID="@ID@"
-LANG="C"
-LICENSE=
-METHOD=
-PACKAGE=
-PROGNAME="deforaos-package"
-PROJECTCONF="project.conf"
-VENDOR="DeforaOS"
-VERBOSE=0
-VERSION=
 #executables
 CAT="cat"
 CKSUM="cksum"
 CONFIGURE="configure"
 CP="cp"
 CUT="cut"
+DATE="date"
 DCH="dch"
+DEBUG=
 DPKG="dpkg"
 DPKG_BUILDPACKAGE="dpkg-buildpackage -rfakeroot"
 DPKG_SOURCE="dpkg-source"
@@ -76,7 +61,26 @@ TR="tr"
 UNIQ="uniq"
 WC="wc"
 XMLLINT="xmllint"
-YEAR="$(date +%Y)"
+#settings
+DEVNULL="/dev/null"
+DOMAIN="defora.org"
+EMAIL=
+FORCE=0
+FULLNAME=
+HOMEPAGE="https://www.$DOMAIN"
+ID="@ID@"
+LANG="C"
+LICENSE=
+METHOD=
+PACKAGE=
+PROGNAME="deforaos-package"
+PROJECTCONF="project.conf"
+#XXX we cannot use $PREFIX here
+SYSCONFDIR="/usr/local/etc"
+VENDOR="DeforaOS"
+VERBOSE=0
+VERSION=
+YEAR="$($DATE +%Y)"
 #dependencies
 DEPEND_desktop=0
 DEPEND_docbookxsl=0
@@ -90,6 +94,11 @@ DEBIAN_PREFIX=
 PKGSRC_CATEGORY="wip"
 PKGSRC_PREFIX=
 PKGSRC_ROOT="/usr/pkgsrc"
+#load local settings
+[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
+[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
+	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
 
 
 #functions
@@ -1053,7 +1062,7 @@ _size()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-Dfv][-e e-mail][-i id][-l license][-m method][-n name][-O name=value...] revision" 1>&2
+	echo "Usage: $PROGNAME [-Dfv][-e e-mail][-i id][-l license][-m method][-n name] revision" 1>&2
 	echo "  -D	Run in debugging mode" 1>&2
 	echo "  -f	Reset the packaging information" 1>&2
 	echo "  -v	Verbose mode" 1>&2
