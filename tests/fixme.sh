@@ -110,8 +110,8 @@ _fixme_callback()
 			;;
 	esac
 	case $($HEAD -n 1 "$filename") in
-		"#!/bin/sh"|"#! /bin/sh"
-		|"#!/usr/bin/env bash"|"#! /usr/bin/env bash")
+		"#!/bin/sh"*|"#! /bin/sh"*|\
+		"#!/usr/bin/env bash"*|"#! /usr/bin/env bash"*)
 			echo "_fixme_callback_sh"
 			return 0
 			;;
