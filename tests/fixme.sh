@@ -25,6 +25,7 @@
 
 
 #variables
+CONFIGSH="${0%/fixme.sh}/../config.sh"
 PROGNAME="fixme.sh"
 PROJECTCONF="../project.conf"
 REGEXP_ERROR="FIXME"
@@ -38,6 +39,8 @@ HEAD="head"
 MKDIR="mkdir -p"
 SORT="sort -n"
 TR="tr"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions
@@ -92,7 +95,7 @@ _fixme_callback()
 			echo "_fixme_callback_asm"
 			return 0
 			;;
-		c|cc|cpp|cxx|h|js)
+		c|cc|cpp|cxx|h|js|v)
 			echo "_fixme_callback_c"
 			return 0
 			;;
