@@ -29,6 +29,7 @@
 #environment
 #executables
 CONFIGURE="configure"
+CONFIGURE_UPDATE="configure-update"
 CVS="cvs"
 GIT="git"
 GREP="grep"
@@ -162,6 +163,7 @@ _deforaos_release()
 _release_configure()
 {
 	if [ -f "$PROJECTCONF" ]; then
+		$DEBUG $CONFIGURE_UPDATE &&
 		$DEBUG $CONFIGURE
 		return $?
 	fi
