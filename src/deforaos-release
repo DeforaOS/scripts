@@ -39,6 +39,7 @@ TAR="tar"
 TR="tr"
 WC="wc"
 #settings
+CONFIGURE_MODE="release"
 DEBUG=
 DEVNULL="/dev/null"
 DESKTOPEXT=".desktop"
@@ -164,7 +165,7 @@ _release_configure()
 {
 	if [ -f "$PROJECTCONF" ]; then
 		$DEBUG $CONFIGURE_UPDATE &&
-		$DEBUG $CONFIGURE
+		$DEBUG $CONFIGURE -M "$CONFIGURE_MODE"
 		return $?
 	fi
 	return 0
@@ -280,8 +281,9 @@ _info()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-Dfnv] version" 1>&2
+	echo "Usage: $PROGNAME [-Dfnv][-M mode] version" 1>&2
 	echo "  -D	Run in debugging mode" 1>&2
+	echo "  -M	Set the project mode (default: release)" 1>&2
 	echo "  -f	Do not perform tests" 1>&2
 	echo "  -n	Do not actually publish changes (dry-run)" 1>&2
 	echo "  -v	Verbose mode" 1>&2
@@ -291,10 +293,13 @@ _usage()
 
 #main
 #parse options
-while getopts "DfnvO:" name; do
+while getopts "DM:O:fnv" name; do
 	case "$name" in
 		D)
 			DEBUG="_debug"
+			;;
+		M)
+			CONFIGURE_MODE="$OPTARG"
 			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
