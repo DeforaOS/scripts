@@ -47,12 +47,13 @@ II_PREFIX="/var/tmp/ii"
 PREFIX="/usr/local"
 PROGNAME="deforaos-irc"
 SYSCONFDIR="$PREFIX/etc"
+VENDOR="DeforaOS"
 VERBOSE=0
 #load local settings
-[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
-	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
-[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
-	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
+[ -f "$SYSCONFDIR/$VENDOR/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/$VENDOR/$PROGNAME.conf"
+[ -f "$HOME/.config/$VENDOR/$PROGNAME.conf" ] &&
+	. "$HOME/.config/$VENDOR/$PROGNAME.conf"
 
 
 #functions
