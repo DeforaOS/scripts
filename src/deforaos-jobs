@@ -27,7 +27,6 @@
 
 
 #variables
-PROGNAME="deforaos-jobs"
 #executables
 DATABASE="database"
 DEBUG=
@@ -35,6 +34,8 @@ LOCK="mkdir"
 UNLOCK="rmdir"
 SED="sed"
 #settings
+PROGNAME="deforaos-jobs"
+
 DATABASE_CONFFILE="$PROGNAME.conf"
 DATABASE_ENGINE="sqlite3"
 DATABASE_FILE="$PROGNAME.db"
