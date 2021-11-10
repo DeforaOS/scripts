@@ -95,19 +95,19 @@ _database_exec()
 		return $?
 	fi
 
-	_database_init						|| return 2
-	_database_lock						|| return 3
+	_database_init							|| return 2
+	_database_lock "$DATABASE_FILE"					|| return 3
 	_database_query "$QUERY_EXEC_SELECT" | (IFS="|"
 	read header
 	read empty jobs_id command empty
 	if [ -z "$jobs_id" ]; then
-		_database_unlock				|| return 4
+		_database_unlock "$DATABASE_FILE"			|| return 4
 		return 0
 	fi
 	#XXX TOCTOU
 	QUERY="UPDATE jobs SET started=datetime() WHERE jobs_id='$jobs_id'"
 	_database_query "$QUERY" > "$DEVNULL"
-	_database_unlock
+	_database_unlock "$DATABASE_FILE"
 	code=-1
 	if [ -n "$command" ]; then
 		_info "Executing command: $command"
@@ -133,9 +133,9 @@ _database_init()
 	fi
 	if [ ! -f "$DATABASE_FILE" ]; then
 		_info "Initializing the database"
-		_database_lock					|| return 3
-		_database_query "$QUERY_INIT" > "$DEVNULL"	|| ret=2
-		_database_unlock				|| return 4
+		_database_lock "$DATABASE_FILE"				|| return 3
+		_database_query "$QUERY_INIT" > "$DEVNULL"		|| ret=2
+		_database_unlock "$DATABASE_FILE"			|| return 4
 	fi
 	return $ret
 }
@@ -157,7 +157,9 @@ _database_list()
 #database_lock
 _database_lock()
 {
-	$DEBUG $LOCK "${DATABASE_FILE%.db}"
+	filename="$1"
+
+	$DEBUG $LOCK "$filename.lock"
 }
 
 
@@ -171,7 +173,9 @@ _database_query()
 #database_unlock
 _database_unlock()
 {
-	$DEBUG $UNLOCK "${DATABASE_FILE%.db}"
+	filename="$1"
+
+	$DEBUG $UNLOCK "$filename.lock"
 }
 
 
