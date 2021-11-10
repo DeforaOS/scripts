@@ -29,7 +29,7 @@
 #variables
 #executables
 DATABASE="database"
-DEBUG=
+DEBUG="_debug"
 LOCK="mkdir"
 UNLOCK="rmdir"
 SED="sed"
@@ -49,6 +49,7 @@ QUERY_INIT="CREATE TABLE jobs (jobs_id INTEGER PRIMARY KEY, timestamp TIMESTAMP 
 QUERY_LIST="SELECT * FROM jobs"
 SYSCONFDIR="$PREFIX/etc"
 VENDOR="DeforaOS"
+VERBOSE=1
 #load local settings
 [ -f "$SYSCONFDIR/$VENDOR/$PROGNAME.conf" ] &&
 	. "$SYSCONFDIR/$VENDOR/$PROGNAME.conf"
@@ -73,6 +74,7 @@ _database_add()
 	command="$1"
 	query="$QUERY_ADD_BEGIN$(echo "$command" | _database_escape)$QUERY_ADD_END"
 
+	_info "Queueing command: $command"
 	_database_init						|| return 2
 	_database_query "$query" > "$DEVNULL"			|| return 2
 }
@@ -108,6 +110,7 @@ _database_exec()
 	_database_unlock
 	code=-1
 	if [ -n "$command" ]; then
+		_info "Executing command: $command"
 		$DEBUG sh -c "$command" &
 		pid=$!
 		QUERY="UPDATE jobs SET pid='$pid' WHERE jobs_id='$jobs_id'"
@@ -129,6 +132,7 @@ _database_init()
 		echo "filename=$DATABASE_FILE" > "$DATABASE_CONFFILE"
 	fi
 	if [ ! -f "$DATABASE_FILE" ]; then
+		_info "Initializing the database"
 		_database_lock					|| return 3
 		_database_query "$QUERY_INIT" > "$DEVNULL"	|| ret=2
 		_database_unlock				|| return 4
@@ -145,6 +149,7 @@ _database_list()
 		return $?
 	fi
 	_database_init						|| return 2
+	_info "Listing the jobs"
 	_database_query "$QUERY_LIST"				|| return 2
 }
 
@@ -173,7 +178,7 @@ _database_unlock()
 #debug
 _debug()
 {
-	echo "$@" 1>&3
+	[ $VERBOSE -ge 2 ] && echo "$@" 1>&3
 	"$@"
 }
 
@@ -186,28 +191,38 @@ _error()
 }
 
 
+#info
+_info()
+{
+	[ $VERBOSE -eq 0 ] || echo "$PROGNAME: $@"
+}
+
+
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-d directory] add command" 1>&2
-	echo "       $PROGNAME [-d directory] exec" 1>&2
-	echo "       $PROGNAME [-d directory] list" 1>&2
+	echo "Usage: $PROGNAME [-d directory][-qv] add command" 1>&2
+	echo "       $PROGNAME [-d directory][-qv] exec" 1>&2
+	echo "       $PROGNAME [-d directory][-qv] list" 1>&2
 	return 1
 }
 
 
 #main
 directory=
-while getopts "DO:d:" name; do
+while getopts "O:d:qv" name; do
 	case "$name" in
-		D)
-			DEBUG="_debug"
-			;;
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
 		d)
 			directory="$OPTARG"
+			;;
+		q)
+			VERBOSE=0
+			;;
+		v)
+			VERBOSE=$((VERBOSE + 1))
 			;;
 		?)
 			_usage
