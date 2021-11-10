@@ -47,11 +47,12 @@ QUERY_EXEC_SELECT="SELECT jobs_id, command FROM jobs WHERE started IS NULL ORDER
 QUERY_INIT="CREATE TABLE jobs (jobs_id INTEGER PRIMARY KEY, timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, command VARCHAR(255), started TIMESTAMP DEFAULT NULL, pid INTEGER DEFAULT NULL, code INTEGER DEFAULT NULL, completed TIMESTAMP DEFAULT NULL)"
 QUERY_LIST="SELECT * FROM jobs"
 SYSCONFDIR="$PREFIX/etc"
+VENDOR="DeforaOS"
 #load local settings
-[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
-	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
-[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
-	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
+[ -f "$SYSCONFDIR/$VENDOR/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/$VENDOR/$PROGNAME.conf"
+[ -f "$HOME/.config/$VENDOR/$PROGNAME.conf" ] &&
+	. "$HOME/.config/$VENDOR/$PROGNAME.conf"
 
 #Error codes:
 #  1	Usage error
