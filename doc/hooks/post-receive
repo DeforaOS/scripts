@@ -1,5 +1,7 @@
 #!/bin/sh
-#Copyright (c) 2014-2017 Pierre Pronchery <khorben@defora.org>
+#$Id$
+#Copyright (c) 2014-2021 Pierre Pronchery <khorben@defora.org>
+#This file is part of DeforaOS Devel scripts
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions
@@ -25,59 +27,82 @@
 
 
 #variables
-GIT_GITWEB="https://git.defora.org/gitweb"
-GIT_MIRROR="/home/defora/git"
-GIT_REMOTE="origin"
-IRC_CHANNEL="#DeforaOS"
-IRC_SERVER="irc.oftc.net"
+PREFIX="/usr/local"
 #executables
-GIT="/usr/bin/git"
-HOOK="/usr/local/libexec/deforaos-git-hook.sh"
-IRC="/usr/local/libexec/deforaos-irc.sh -N -s $IRC_SERVER -c $IRC_CHANNEL -n defora"
-MKTEMP="/bin/mktemp"
-RM="/bin/rm -f"
+GIT_MESSAGE="$PREFIX/libexec/deforaos-git-message"
+DEFORAOS_IRC="$PREFIX/libexec/deforaos-irc"
+DEFORAOS_JOBS="$PREFIX/bin/deforaos-jobs"
+MKTEMP="mktemp"
+RM="rm -f"
+#settings
+HOOKS="jobs"
+IRC_CHANNEL=
+IRC_SERVER=
+JOBS_BRANCH_MASTER="$PREFIX/libexec/deforaos-jobs/deforaos-job-git-mirror
+$PREFIX/libexec/deforaos-jobs/deforaos-job-git-doc
+$PREFIX/libexec/deforaos-jobs/deforaos-job-git-tests"
+PROGNAME="deforaos-git-hook"
+SYSCONFDIR="$PREFIX/etc"
+VENDOR="DeforaOS"
+#load local settings
+[ -f "$SYSCONFDIR/$VENDOR/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/$VENDOR/$PROGNAME.conf"
+[ -f "$HOME/.config/$VENDOR/$PROGNAME.conf" ] &&
+	. "$HOME/.config/$VENDOR/$PROGNAME.conf"
 
 
 #functions
+#hook_jobs
+_hook_jobs()
+{
+	res=0
+
+	while read oldrev newrev refname; do
+		case "$refname" in
+			refs/heads/master)
+				_jobs_branch "${refname#refs/heads/}" \
+					"$GL_REPO"		|| res=2
+				;;
+		esac
+	done
+	return $res
+}
+
+_jobs_branch()
+{(
+	branch="$1"
+	repository="$2"
+	res=0
+
+	if [ "$branch" = "master" -a -n "$JOBS_BRANCH_MASTER" ]; then
+		for job in $JOBS_BRANCH_MASTER; do
+			#warn if the job is not available
+			[ -x "$job" ] || _error "$job: Job not available"
+			$DEFORAOS_JOBS add "$job $repository"	|| res=2
+		done
+	fi
+	return $res
+)}
+
+
 #hook_irc
 _hook_irc()
 {
-	$HOOK -O GITWEB="$GIT_GITWEB" "post-receive" | $IRC
+	if [ -z "$IRC_SERVER" -o -z "$IRC_CHANNEL" ]; then
+		_error "IRC_SERVER and IRC_CHANNEL must be set for the IRC hook"
+		return $?
+	fi
+	$GIT_MESSAGE "post-receive" 2>&1 | $DEFORAOS_IRC "$IRC_SERVER" "$IRC_CHANNEL"
 	#ignore errors
 	return 0
 }
 
 
-#hook_mirror
-_hook_mirror()
+#error
+_error()
 {
-	ret=0
-
-	[ -d "$GIT_MIRROR" ]					|| return 2
-	while read oldrev newrev refname; do
-		branch=
-		case "$refname" in
-			refs/heads/*)
-				branch=${refname#refs/heads/}
-				;;
-		esac
-		[ "$branch" = "master" ] || continue
-		mirror="$GIT_MIRROR/${GL_REPO}.git"
-		if [ ! -d "$mirror" ]; then
-			#clone the repository
-			$GIT clone "$HOME/repositories/${GL_REPO}.git" "$mirror"
-			if [ $? -ne 0 ]; then
-				echo "$GL_REPO: Could not create mirror" 1>&2
-				continue
-			fi
-		fi
-		#mirror the repository
-		(unset GIT_DIR;
-			cd "$mirror" &&
-			$GIT fetch -q "$GIT_REMOTE" &&
-			$GIT reset -q --hard "$GIT_REMOTE/$branch") || ret=2
-	done
-	return $ret
+	echo "$PROGNAME: $@" 1>&2
+	return 2
 }
 
 
@@ -89,9 +114,11 @@ while read line; do
 	echo "$line" >> "$tmpfile"
 done
 #chain the hooks
-_hook_mirror < "$tmpfile"
-_hook_irc < "$tmpfile"
+ret=0
+[ -n "$HOOKS" ] && for hook in $HOOKS; do
+	"_hook_$hook" < "$tmpfile"				|| ret=2
+done
 #clean up
 $RM -- "$tmpfile"						|| exit 2
 
-exit 0
+exit $ret
