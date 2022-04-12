@@ -95,11 +95,12 @@ _jobs_tag()
 {(
 	tag="$1"
 	repository="$2"
+	project="${repository##*/}"
 	res=0
 
 	[ -z "$JOBS_TAG_RELEASE" ] && return 0
 	case "$tag" in
-		${repository}_*-*-*)
+		${project}_*-*-*)
 			for job in $JOBS_TAG_RELEASE; do
 				#warn if the job is not available
 				if [ ! -x "$job" ]; then
