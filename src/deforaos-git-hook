@@ -98,7 +98,7 @@ _jobs_tag()
 	project="${repository##*/}"
 	res=0
 
-	[ -z "$JOBS_TAG_RELEASE" ] && return 0
+	[ -n "$JOBS_TAG_RELEASE" ]				|| return 0
 	case "$tag" in
 		${project}_*-*-*)
 			for job in $JOBS_TAG_RELEASE; do
