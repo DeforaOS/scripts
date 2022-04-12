@@ -35,7 +35,7 @@ DEFORAOS_JOBS="$PREFIX/bin/deforaos-jobs"
 MKTEMP="mktemp"
 RM="rm -f"
 #settings
-HOOKS="irc jobs"
+HOOKS="jobs irc"
 IRC_CHANNEL=
 IRC_SERVER=
 JOBS_BRANCH_MASTER="$PREFIX/libexec/deforaos-jobs/deforaos-job-git-mirror
