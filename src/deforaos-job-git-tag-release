@@ -1,0 +1,159 @@
+#!/bin/sh
+#$Id$
+#Copyright (c) 2022 Pierre Pronchery <khorben@defora.org>
+#This file is part of DeforaOS Devel scripts
+#
+#Redistribution and use in source and binary forms, with or without
+#modification, are permitted provided that the following conditions
+#are met:
+#1. Redistributions of source code must retain the above copyright
+#   notice, this list of conditions and the following disclaimer.
+#2. Redistributions in binary form must reproduce the above copyright
+#   notice, this list of conditions and the following disclaimer in the
+#   documentation and/or other materials provided with the distribution.
+#
+#THIS SOFTWARE IS PROVIDED BY THE EDGEBSD PROJECT AND CONTRIBUTORS
+#``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+#TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR CONTRIBUTORS
+#BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#POSSIBILITY OF SUCH DAMAGE.
+
+
+
+#variables
+PREFIX="/usr/local"
+#executables
+CONFIGURE="configure -O NetBSD"
+GIT="git"
+GIT_CLONE="$GIT clone -q"
+GIT_SUBMODULE="$GIT submodule -q"
+MAKE="make"
+MKTEMP="mktemp"
+RM="/bin/rm -f"
+RSYNC="rsync -a"
+TR="tr"
+#settings
+GIT_TAG=
+GIT_REMOTE=
+MAKE_TARGET="dist"
+MIRROR="ftp:pub"
+PROGNAME="deforaos-job-git-tag-release"
+SYSCONFDIR="$PREFIX/etc"
+#load local settings
+[ -f "$SYSCONFDIR/DeforaOS/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/DeforaOS/$PROGNAME.conf"
+[ -f "$HOME/.config/DeforaOS/$PROGNAME.conf" ] &&
+	. "$HOME/.config/DeforaOS/$PROGNAME.conf"
+
+
+#functions
+#git_tag_release
+_git_tag_release()
+{
+	ret=0
+	repository="$1"
+	tag="$2"
+
+	#create a temporary directory
+	tmpdir=$($MKTEMP -d)
+	if [ $? -ne 0 ]; then
+		return 2
+	fi
+	#clone the repository
+	$GIT_CLONE --single-branch -b "$tag" \
+		"$GIT_REMOTE${repository}.git" "$tmpdir/repository"
+	if [ $? -ne 0 ]; then
+		echo "$repository: Could not clone" 1>&2
+	else
+		_tag_release_do "$repository" "$tag"
+	fi
+	#cleanup
+	$RM -r "$tmpdir"
+	return $ret
+}
+
+_tag_release_do()
+{
+	repository="$1"
+	tag="$2"
+	version="$(echo "$tag" | $TR "_-" "-.")"
+
+	#update submodules if any
+	if [ -f "$tmpdir/repository/.gitmodules" ]; then
+		(cd "$tmpdir/repository" &&
+			$GIT_SUBMODULE init &&
+			$GIT_SUBMODULE update)
+		[ $? -eq 0 ] || return 2
+	fi
+	#generate Makefiles if relevant
+	if [ -f "$tmpdir/repository/project.conf" ]; then
+		(cd "$tmpdir/repository" && $CONFIGURE)
+	elif [ -x "$tmpdir/repository/autogen.sh" ]; then
+		(cd "$tmpdir/repository" && ./autogen.sh)
+	elif [ -x "$tmpdir/repository/configure" ]; then
+		(cd "$tmpdir/repository" && ./configure)
+	fi
+	#generate the archive
+	if [ $? -ne 0 -o ! -f "$tmpdir/repository/Makefile" ]; then
+		_error "Unable to generate the archive"
+		return $?
+	fi
+	(cd "$tmpdir/repository" && $MAKE "$MAKE_TARGET")
+	if [ $? -ne 0 ]; then
+		_error "Could not generate the archive"
+		return $?
+	fi
+	#locate the archive
+	if [ ! -f "$tmpdir/repository/$repository-$version.tar.gz" ]; then
+		_error "Could not locate the archive"
+		return $?
+	fi
+	#upload the archive
+	$RSYNC "$tmpdir/destdir$DATADIR/gtk-doc" "$MIRROR"
+	if [ ! -f "$tmpdir/repository/$repository-$version.tar.gz" ]; then
+		_error "Could not upload the archive"
+		return $?
+	fi
+}
+
+
+#error
+_error()
+{
+	echo "$PROGNAME: $@" 1>&2
+	return 2
+}
+
+
+#usage
+_usage()
+{
+	echo "Usage: $PROGNAME repository tag" 1>&2
+	return 1
+}
+
+
+#main
+while getopts "O:" name; do
+	case "$name" in
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
+		*)
+			_usage
+			exit $?
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+if [ $# -ne 2 ]; then
+	_usage
+	exit $?
+fi
+_git_tag_release "$1" "$2"

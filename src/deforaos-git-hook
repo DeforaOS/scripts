@@ -41,6 +41,7 @@ IRC_SERVER=
 JOBS_BRANCH_MASTER="$PREFIX/libexec/deforaos-jobs/deforaos-job-git-mirror
 $PREFIX/libexec/deforaos-jobs/deforaos-job-git-doc
 $PREFIX/libexec/deforaos-jobs/deforaos-job-git-tests"
+JOBS_TAG_RELEASE="$PREFIX/libexec/deforaos-jobs/deforaos-job-git-tag-release"
 PROGNAME="deforaos-git-hook"
 SYSCONFDIR="$PREFIX/etc"
 #load local settings
@@ -60,6 +61,10 @@ _hook_jobs()
 		case "$refname" in
 			refs/heads/*)
 				_jobs_branch "${refname#refs/heads/}" \
+					"$GL_REPO"		|| res=2
+				;;
+			refs/tags/*)
+				_jobs_tag "${refname#refs/tags/}" \
 					"$GL_REPO"		|| res=2
 				;;
 		esac
@@ -83,6 +88,29 @@ _jobs_branch()
 			$DEFORAOS_JOBS add "$job $repository"	|| res=2
 		done
 	fi
+	return $res
+)}
+
+_jobs_tag()
+{(
+	tag="$1"
+	repository="$2"
+	res=0
+
+	[ -z "$JOBS_TAG_RELEASE" ] && return 0
+	case "$tag" in
+		${repository}_*-*-*)
+			for job in $JOBS_TAG_RELEASE; do
+				#warn if the job is not available
+				if [ ! -x "$job" ]; then
+					_error "$job: Job not available"
+					continue
+				fi
+				$DEFORAOS_JOBS add "$job $repository $tag" \
+								|| res=2
+			done
+			;;
+	esac
 	return $res
 )}
 
