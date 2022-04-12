@@ -76,7 +76,10 @@ _jobs_branch()
 	if [ "$branch" = "master" -a -n "$JOBS_BRANCH_MASTER" ]; then
 		for job in $JOBS_BRANCH_MASTER; do
 			#warn if the job is not available
-			[ -x "$job" ] || _error "$job: Job not available"
+			if [ ! -x "$job" ]; then
+				_error "$job: Job not available"
+				continue
+			fi
 			$DEFORAOS_JOBS add "$job $repository"	|| res=2
 		done
 	fi
