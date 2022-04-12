@@ -83,6 +83,7 @@ _tag_release_do()
 	repository="$1"
 	tag="$2"
 	version="$(echo "$tag" | $TR "_-" "-.")"
+	filename="${repository#*/}-$version.tar.gz"
 
 	#update submodules if any
 	if [ -f "$tmpdir/repository/.gitmodules" ]; then
@@ -110,13 +111,13 @@ _tag_release_do()
 		return $?
 	fi
 	#locate the archive
-	if [ ! -f "$tmpdir/repository/$repository-$version.tar.gz" ]; then
+	if [ ! -f "$tmpdir/repository/$filename" ]; then
 		_error "Could not locate the archive"
 		return $?
 	fi
 	#upload the archive
-	$RSYNC "$tmpdir/destdir$DATADIR/gtk-doc" "$MIRROR"
-	if [ ! -f "$tmpdir/repository/$repository-$version.tar.gz" ]; then
+	$RSYNC "$tmpdir/repository/$filename" "$MIRROR"
+	if [ $? -ne 0 ]; then
 		_error "Could not upload the archive"
 		return $?
 	fi
