@@ -42,7 +42,7 @@ TR="tr"
 GIT_TAG=
 GIT_REMOTE=
 MAKE_TARGET="dist"
-MIRROR="ftp:pub"
+MIRROR="ftp:incoming"
 PROGNAME="deforaos-job-git-tag-release"
 SYSCONFDIR="$PREFIX/etc"
 #load local settings
