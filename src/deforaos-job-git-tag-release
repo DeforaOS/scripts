@@ -82,8 +82,7 @@ _tag_release_do()
 {
 	repository="$1"
 	tag="$2"
-	version="$(echo "$tag" | $TR "_-" "-.")"
-	filename="${repository#*/}-$version.tar.gz"
+	filename="$(echo "$tag" | $TR "_-" "-.").tar.gz"
 
 	#update submodules if any
 	if [ -f "$tmpdir/repository/.gitmodules" ]; then
