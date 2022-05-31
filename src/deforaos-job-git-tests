@@ -71,8 +71,17 @@ _git_tests()
 			(cd "$tmpdir/repository" &&
 			$GIT_SUBMODULE init &&
 			$GIT_SUBMODULE update)
+		#generate Makefiles if relevant
+		if [ -f "$tmpdir/repository/project.conf" ]; then
+			(cd "$tmpdir/repository" && $CONFIGURE)
+		elif [ -x "$tmpdir/repository/autogen.sh" ]; then
+			(cd "$tmpdir/repository" && ./autogen.sh)
+		elif [ -x "$tmpdir/repository/configure" ]; then
+			(cd "$tmpdir/repository" && ./configure)
+		fi
 		#run tests if available
-		(cd "$tmpdir" && $CONFIGURE && $MAKE tests)	|| ret=2
+		(cd "$tmpdir/repository"
+			&& $MAKE tests)				|| ret=2
 	fi
 	#cleanup
 	$RM -r "$tmpdir"
