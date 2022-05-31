@@ -80,8 +80,8 @@ _git_tests()
 			(cd "$tmpdir/repository" && ./configure)
 		fi
 		#run tests if available
-		(cd "$tmpdir/repository"
-			&& $MAKE tests)				|| ret=2
+		(cd "$tmpdir/repository" &&
+			$MAKE tests)				|| ret=2
 	fi
 	#cleanup
 	$RM -r "$tmpdir"
