@@ -62,10 +62,10 @@ _git_tests()
 	fi
 	#clone the repository
 	$GIT_CLONE --single-branch -b "$GIT_BRANCH" \
-		"$GIT_REMOTE${repository}.git" "$tmpdir"
+		"$GIT_REMOTE${repository}.git" "$tmpdir/repository"
 	if [ $? -ne 0 ]; then
 		echo "$repository: Could not clone" 1>&2
-	elif [ -d "$tmpdir/tests" ]; then
+	elif [ -d "$tmpdir/repository/tests" ]; then
 		#update submodules if any
 		[ -f "$tmpdir/repository/.gitmodules" ] &&
 			(cd "$tmpdir/repository" &&
