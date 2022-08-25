@@ -58,6 +58,8 @@ _hook_jobs()
 	res=0
 
 	while read oldrev newrev refname; do
+		[ "$newrev" != "0000000000000000000000000000000000000000" ] ||
+			continue
 		case "$refname" in
 			refs/heads/*)
 				_jobs_branch "${refname#refs/heads/}" \
